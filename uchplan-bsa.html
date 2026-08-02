@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Учебный план 38.03.01 — Бизнес-статистика и аналитика (2022)</title>
+<style>
+  :root {
+    color-scheme: light;
+    --surface-1: #fcfcfb;
+    --page: #f9f9f7;
+    --text-primary: #0b0b0b;
+    --text-secondary: #52514e;
+    --muted: #898781;
+    --grid: #e1e0d9;
+    --axis: #c3c2b7;
+    --border: rgba(11,11,11,0.10);
+    --s1: #2a78d6;
+    --s2: #eb6834;
+    --s3: #1baf7a;
+    --s4: #eda100;
+    --s5: #e87ba4;
+    --dim: #d5d4cd;
+    --dim-ink: #a3a29b;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) {
+      color-scheme: dark;
+      --surface-1: #1a1a19;
+      --page: #0d0d0d;
+      --text-primary: #ffffff;
+      --text-secondary: #c3c2b7;
+      --muted: #898781;
+      --grid: #2c2c2a;
+      --axis: #383835;
+      --border: rgba(255,255,255,0.10);
+      --s1: #3987e5;
+      --s2: #d95926;
+      --s3: #199e70;
+      --s4: #c98500;
+      --s5: #d55181;
+      --dim: #3a3a37;
+      --dim-ink: #6f6e68;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --surface-1: #1a1a19;
+    --page: #0d0d0d;
+    --text-primary: #ffffff;
+    --text-secondary: #c3c2b7;
+    --muted: #898781;
+    --grid: #2c2c2a;
+    --axis: #383835;
+    --border: rgba(255,255,255,0.10);
+    --s1: #3987e5;
+    --s2: #d95926;
+    --s3: #199e70;
+    --s4: #c98500;
+    --s5: #d55181;
+    --dim: #3a3a37;
+    --dim-ink: #6f6e68;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--page);
+    color: var(--text-primary);
+    font: 14px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+    padding: 32px 24px 64px;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; }
+
+  header.top { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; margin-bottom: 28px; }
+  h1 { font-size: 22px; font-weight: 600; margin: 0 0 6px; letter-spacing: -0.01em; }
+  .sub { color: var(--text-secondary); font-size: 13px; margin: 0; }
+  .meta { color: var(--muted); font-size: 12px; margin-top: 6px; }
+
+  button.ghost {
+    background: transparent; border: 1px solid var(--border); color: var(--text-secondary);
+    border-radius: 8px; padding: 7px 12px; font: inherit; font-size: 13px; cursor: pointer; white-space: nowrap;
+  }
+  button.ghost:hover { background: var(--surface-1); color: var(--text-primary); }
+
+  .card {
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px;
+    padding: 20px 22px; margin-bottom: 18px;
+  }
+  .card h2 { font-size: 15px; font-weight: 600; margin: 0 0 4px; }
+  .card .note { color: var(--text-secondary); font-size: 12.5px; margin: 0 0 18px; }
+
+  /* KPI */
+  .kpis { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 14px; margin-bottom: 18px; }
+  .tile { background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; }
+  .tile .label { color: var(--text-secondary); font-size: 12.5px; margin-bottom: 8px; }
+  .tile .value { font-size: 30px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.1; }
+  .tile.hero .value { font-size: 52px; }
+  .tile .unit { font-size: 15px; font-weight: 400; color: var(--text-secondary); margin-left: 4px; }
+  .tile .foot { color: var(--muted); font-size: 12px; margin-top: 8px; }
+
+  /* legend */
+  .legend { display: flex; flex-wrap: wrap; gap: 16px; margin: 0 0 16px; }
+  .legend .item { display: flex; align-items: center; gap: 7px; font-size: 12.5px; color: var(--text-secondary); }
+  .legend .sw { width: 11px; height: 11px; border-radius: 3px; flex: none; }
+
+  svg { display: block; width: 100%; overflow: visible; }
+  .tick { fill: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+  .axlabel { fill: var(--text-secondary); font-size: 11.5px; }
+  .dlabel { fill: var(--text-primary); font-size: 11.5px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .gridline { stroke: var(--grid); stroke-width: 1; }
+  .baseline { stroke: var(--axis); stroke-width: 1; }
+  .hit { fill: transparent; cursor: default; }
+
+  /* tooltip */
+  #tip {
+    position: fixed; pointer-events: none; opacity: 0; transition: opacity .1s;
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 9px;
+    padding: 9px 12px; font-size: 12.5px; box-shadow: 0 6px 22px rgba(0,0,0,.14); z-index: 50;
+    max-width: 280px;
+  }
+  #tip .t { font-weight: 600; margin-bottom: 5px; }
+  #tip .r { display: flex; align-items: center; gap: 7px; color: var(--text-secondary); }
+  #tip .r b { color: var(--text-primary); font-weight: 600; font-variant-numeric: tabular-nums; margin-left: auto; }
+  #tip .sw { width: 9px; height: 9px; border-radius: 2px; flex: none; }
+
+  /* filters */
+  .filters { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 18px; }
+  .filters select, .filters input {
+    font: inherit; font-size: 13px; padding: 7px 10px; border-radius: 8px;
+    border: 1px solid var(--border); background: var(--surface-1); color: var(--text-primary);
+  }
+  .filters input { min-width: 220px; }
+  .filters .fl { color: var(--muted); font-size: 12px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; font-weight: 600; color: var(--text-secondary); font-size: 12px;
+       padding: 8px 10px; border-bottom: 1px solid var(--axis); white-space: nowrap; }
+  td { padding: 8px 10px; border-bottom: 1px solid var(--grid); vertical-align: top; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  tr.eng td { background: color-mix(in srgb, var(--s1) 8%, transparent); }
+  .chip { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-secondary); }
+  .chip .sw { width: 8px; height: 8px; border-radius: 2px; flex: none; }
+  .tfoot { color: var(--muted); font-size: 12px; margin-top: 12px; }
+  footer { color: var(--muted); font-size: 12px; margin-top: 28px; line-height: 1.7; }
+
+  @media (max-width: 860px) {
+    .kpis { grid-template-columns: 1fr 1fr; }
+    body { padding: 20px 14px 48px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <div>
+    <h1>Учебный план — 38.03.01 Экономика, «Бизнес-статистика и аналитика»</h1>
+    <p class="sub">РЭУ им. Г.В. Плеханова · бакалавриат, очная форма, 4 года · год начала подготовки 2022</p>
+    <p class="meta">Кафедра статистики · ВШ кибертехнологий, математики и статистики · ФГОС № 954 от 12.08.2020</p>
+  </div>
+  <button class="ghost" id="theme">Тёмная / светлая</button>
+</header>
+
+<!-- KPI -->
+<div class="kpis">
+  <div class="tile hero">
+    <div class="label">Английский язык за всю программу</div>
+    <div class="value" id="engHours">504<span class="unit">акад. ч</span></div>
+    <div class="foot">14 з.е. · 6 семестров подряд (1–6) · 5,8% от объёма программы</div>
+  </div>
+  <div class="tile">
+    <div class="label">Всего по программе</div>
+    <div class="value">8 640<span class="unit">ч</span></div>
+    <div class="foot">240 з.е. без факультативов</div>
+  </div>
+  <div class="tile">
+    <div class="label">Аудиторных часов англ.</div>
+    <div class="value">244</div>
+    <div class="foot">остальное — СРС и контроль</div>
+  </div>
+  <div class="tile">
+    <div class="label">Экзаменов по английскому</div>
+    <div class="value">2</div>
+    <div class="foot">4-й и 6-й семестры</div>
+  </div>
+</div>
+
+<!-- ENGLISH BY SEMESTER -->
+<div class="card">
+  <h2>Английский по семестрам</h2>
+  <p class="note">Первые четыре семестра — общий иностранный язык, пятый и шестой — язык профессионального общения. С 7-го семестра английского в плане нет.</p>
+  <div class="legend">
+    <div class="item"><span class="sw" style="background:var(--s1)"></span>Иностранный язык (Б1.О.03)</div>
+    <div class="item"><span class="sw" style="background:var(--s2)"></span>Иностранный язык проф. общения (Б1.В.01)</div>
+    <div class="item"><span class="sw" style="background:var(--dim)"></span>Английского нет</div>
+  </div>
+  <svg id="engChart" viewBox="0 0 900 260" role="img" aria-label="Часы английского языка по семестрам"></svg>
+</div>
+
+<!-- SEMESTER LOAD -->
+<div class="card">
+  <h2>Нагрузка по семестрам, академические часы</h2>
+  <p class="note">Полная нагрузка включая практики, ГИА и факультативы. Восьмой семестр почти целиком отдан под преддипломную практику и защиту диплома.</p>
+  <div class="legend" id="loadLegend"></div>
+  <svg id="loadChart" viewBox="0 0 900 330" role="img" aria-label="Нагрузка по семестрам по блокам учебного плана"></svg>
+</div>
+
+<!-- TOP DISCIPLINES -->
+<div class="card">
+  <h2>Самые объёмные дисциплины</h2>
+  <p class="note">Топ-16 по часам. Английский выделен цветом: 324 ч — вровень с математическим анализом и защитой диплома, больше только модуль физкультуры.</p>
+  <svg id="topChart" viewBox="0 0 900 640" role="img" aria-label="Самые объёмные дисциплины по часам"></svg>
+</div>
+
+<!-- TABLE -->
+<div class="card">
+  <h2>Все дисциплины</h2>
+  <p class="note">59 дисциплин блока Б1 плюс практики, ГИА и факультативы. Фильтруйте по семестру и блоку или ищите по названию.</p>
+  <div class="filters">
+    <span class="fl">Семестр</span>
+    <select id="fSem"><option value="">все</option></select>
+    <span class="fl">Блок</span>
+    <select id="fBlock"><option value="">все</option></select>
+    <input id="fSearch" type="search" placeholder="Поиск по названию…">
+    <span class="fl" id="fCount"></span>
+  </div>
+  <table>
+    <thead><tr>
+      <th>Дисциплина</th><th>Индекс</th><th>Блок</th><th>Семестры</th>
+      <th class="num">Часы</th><th class="num">з.е.</th>
+    </tr></thead>
+    <tbody id="tbody"></tbody>
+  </table>
+  <div class="tfoot" id="tsum"></div>
+</div>
+
+<footer>
+  Источник: УП «Ucheb_plan_38.03.01_BSiA_2022.plx», утверждён Учёным советом РЭУ, протокол № 10 от 29.03.2022.<br>
+  1 зачётная единица = 36 академических часов. Часы приведены по плану (контактная работа + СРС + контроль).
+</footer>
+
+</div>
+<div id="tip" role="tooltip"></div>
+
+<script>
+// ---------- data ----------
+const ENG = [
+  {sem:1, h:72,  c:1}, {sem:2, h:72,  c:1}, {sem:3, h:72,  c:1}, {sem:4, h:108, c:1},
+  {sem:5, h:72,  c:2}, {sem:6, h:108, c:2}, {sem:7, h:0,   c:0}, {sem:8, h:0,   c:0},
+];
+const ENG_NAME = {1:'Иностранный язык', 2:'Иностранный язык проф. общения'};
+
+const BLOCKS = [
+  {key:'bo',  name:'Б1.О — обязательная часть',  color:'var(--s1)'},
+  {key:'bv',  name:'Б1.В — профильная часть',    color:'var(--s2)'},
+  {key:'pr',  name:'Б2 — практики',              color:'var(--s3)'},
+  {key:'gia', name:'Б3 — итоговая аттестация',   color:'var(--s4)'},
+  {key:'ftd', name:'ФТД — факультативы',         color:'var(--s5)'},
+];
+const LOAD = [
+  {sem:1, bo:990,  bv:0,    pr:0,   gia:0,   ftd:0},
+  {sem:2, bo:1278, bv:0,    pr:0,   gia:0,   ftd:0},
+  {sem:3, bo:1134, bv:0,    pr:0,   gia:0,   ftd:0},
+  {sem:4, bo:1026, bv:0,    pr:108, gia:0,   ftd:108},
+  {sem:5, bo:56,   bv:1116, pr:0,   gia:0,   ftd:0},
+  {sem:6, bo:56,   bv:1044, pr:0,   gia:0,   ftd:72},
+  {sem:7, bo:0,    bv:1116, pr:0,   gia:0,   ftd:0},
+  {sem:8, bo:0,    bv:396,  pr:324, gia:324, ftd:72},
+];
+
+const D = [
+  // [название, индекс, блок, семестры, часы, з.е.]
+  ['Иностранный язык','Б1.О.03','bo',[1,2,3,4],324,9],
+  ['Математический анализ','Б1.О.18','bo',[1,2],324,9],
+  ['Дисциплины по физической культуре и спорту','Б1.О.31','bo',[1,2,3,4,5,6],400,2],
+  ['Динамический анализ и прогнозирование бизнес-процессов','Б1.В.19','bv',[6],216,6],
+  ['Иностранный язык профессионального общения','Б1.В.01','bv',[5,6],180,5],
+  ['Линейная алгебра','Б1.О.19','bo',[2],180,5],
+  ['Теория вероятностей и математическая статистика','Б1.О.20','bo',[3],180,5],
+  ['Микроэкономика','Б1.О.23','bo',[1],180,5],
+  ['Макроэкономика','Б1.О.24','bo',[2],180,5],
+  ['Финансовая математика','Б1.В.11','bv',[7],180,5],
+  ['Статистика малого и среднего бизнеса','Б1.В.12','bv',[6],180,5],
+  ['Демография','Б1.В.20','bv',[5],180,5],
+  ['Философия','Б1.О.02','bo',[3],144,4],
+  ['Право','Б1.О.08','bo',[2],144,4],
+  ['Маркетинг','Б1.О.13','bo',[4],144,4],
+  ['Эконометрика и методы моделирования в экономике','Б1.О.14','bo',[4],144,4],
+  ['Экономика организации','Б1.О.16','bo',[4],144,4],
+  ['Экономическая статистика','Б1.О.27','bo',[4],144,4],
+  ['Бизнес-статистика','Б1.В.03','bv',[5],144,4],
+  ['Статистический анализ в R и Python','Б1.В.05','bv',[5],144,4],
+  ['Статистика финансов','Б1.В.07','bv',[5],144,4],
+  ['Многомерные статистические методы','Б1.В.08','bv',[6],144,4],
+  ['Методы статистики в экономической демографии','Б1.В.10','bv',[6],144,4],
+  ['Эвристические методы прогнозирования','Б1.В.13','bv',[7],144,4],
+  ['Рейтинговые системы в аналитике','Б1.В.16','bv',[7],144,4],
+  ['Прогнозирование социально-демографической конъюнктуры','Б1.В.17','bv',[7],144,4],
+  ['Семантический анализ и текстовые данные','Б1.В.18','bv',[8],144,4],
+  ['Статистика целей устойчивого развития','Б1.В.22','bv',[6],144,4],
+  ['Методы машинного обучения в анализе данных','Б1.В.23','bv',[7],144,4],
+  ['Количественная оценка инвестиций и инноваций','Б1.В.24','bv',[7],144,4],
+  ['Выборочное обследование в SPSS','Б1.В.25','bv',[8],144,4],
+  ['История (история России, всеобщая история)','Б1.О.01','bo',[1],108,3],
+  ['Предпринимательство','Б1.О.06','bo',[1],108,3],
+  ['Финансы','Б1.О.09','bo',[3],108,3],
+  ['Экономика и социология труда','Б1.О.10','bo',[3],108,3],
+  ['Мировая экономика и международные экономические отношения','Б1.О.11','bo',[4],108,3],
+  ['Менеджмент','Б1.О.12','bo',[3],108,3],
+  ['Региональная экономика','Б1.О.15','bo',[3],108,3],
+  ['Информационные технологии и системы в сфере экономики','Б1.О.17','bo',[3],108,3],
+  ['Теория статистики','Б1.О.26','bo',[3],108,3],
+  ['Бухгалтерский учет','Б1.О.29','bo',[4],108,3],
+  ['Экономический анализ','Б1.О.30','bo',[4],108,3],
+  ['Элективные дисциплины. Soft Skills','Б1.О.ДЭ.01','bo',[3],108,3],
+  ['Элективные дисциплины. Digital Skills','Б1.О.ДЭ.02','bo',[4],108,3],
+  ['Исследование операций и методы оптимизации','Б1.В.02','bv',[5],108,3],
+  ['Статистика внешней торговли','Б1.В.04','bv',[5],108,3],
+  ['Прогнозирование финансово-экономической практики','Б1.В.06','bv',[5],108,3],
+  ['Интеллектуальный анализ данных в экономике и социальной сфере','Б1.В.09','bv',[6],108,3],
+  ['Социальная статистика','Б1.В.14','bv',[7],108,3],
+  ['Теория выборочных обследований','Б1.В.15','bv',[7],108,3],
+  ['Математические инструменты в экономических исследованиях','Б1.В.21','bv',[5],108,3],
+  ['Статистика труда и персонала','Б1.В.26','bv',[8],108,3],
+  ['Безопасность жизнедеятельности','Б1.О.04','bo',[2],72,2],
+  ['Социально-психологическая адаптация и коммуникация','Б1.О.05','bo',[1],72,2],
+  ['Государственная антикоррупционная политика','Б1.О.07','bo',[1],72,2],
+  ['История экономики','Б1.О.21','bo',[2],72,2],
+  ['История экономических учений','Б1.О.22','bo',[2],72,2],
+  ['Институциональная экономика','Б1.О.25','bo',[4],72,2],
+  ['Планирование и прогнозирование в экономике','Б1.О.28','bo',[2],72,2],
+  ['Преддипломная практика','Б2.В.01','pr',[8],216,6],
+  ['Учебная (ознакомительная) практика','Б2.О.01','pr',[4],108,3],
+  ['Производственная (проектно-технологическая) практика','Б2.О.02','pr',[8],108,3],
+  ['Подготовка к защите и защита ВКР','Б3.01','gia',[8],324,9],
+  ['Элективные дисциплины (модули) 1 — теория графов и сетей','ФТД.ДЭ.01','ftd',[4],72,2],
+  ['Элективные дисциплины (модули) 2 — статистика отраслей','ФТД.ДЭ.02','ftd',[6],72,2],
+  ['Элективные дисциплины (модули) 3 — прикладной статанализ','ФТД.ДЭ.03','ftd',[8],72,2],
+  ['Организация добровольческой деятельности','ФТД.01','ftd',[4],36,1],
+];
+const BLOCK_NAME = Object.fromEntries(BLOCKS.map(b=>[b.key,b.name]));
+const BLOCK_COLOR = Object.fromEntries(BLOCKS.map(b=>[b.key,b.color]));
+const isEng = d => d[1]==='Б1.О.03' || d[1]==='Б1.В.01';
+
+// ---------- tooltip ----------
+const tip = document.getElementById('tip');
+function showTip(e, html){ tip.innerHTML = html; tip.style.opacity = 1; moveTip(e); }
+function moveTip(e){
+  const pad = 14, w = tip.offsetWidth, h = tip.offsetHeight;
+  let x = e.clientX + pad, y = e.clientY + pad;
+  if (x + w > innerWidth - 8) x = e.clientX - w - pad;
+  if (y + h > innerHeight - 8) y = e.clientY - h - pad;
+  tip.style.left = x + 'px'; tip.style.top = y + 'px';
+}
+function hideTip(){ tip.style.opacity = 0; }
+function bind(el, html){
+  el.addEventListener('mouseenter', e => showTip(e, html));
+  el.addEventListener('mousemove', moveTip);
+  el.addEventListener('mouseleave', hideTip);
+  el.setAttribute('tabindex','0');
+  el.addEventListener('focus', e => {
+    const r = el.getBoundingClientRect();
+    showTip({clientX:r.left+r.width/2, clientY:r.top}, html);
+  });
+  el.addEventListener('blur', hideTip);
+}
+const SVGNS = 'http://www.w3.org/2000/svg';
+function el(tag, attrs, parent){
+  const n = document.createElementNS(SVGNS, tag);
+  for (const k in attrs) n.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(n);
+  return n;
+}
+// rounded on the value-end only, square at the baseline
+function colPath(x, y, w, h, r){
+  if (h <= 0) return '';
+  r = Math.min(r, h, w/2);
+  return `M${x},${y+h} L${x},${y+r} Q${x},${y} ${x+r},${y} L${x+w-r},${y} Q${x+w},${y} ${x+w},${y+r} L${x+w},${y+h} Z`;
+}
+function barPath(x, y, w, h, r){
+  if (w <= 0) return '';
+  r = Math.min(r, w, h/2);
+  return `M${x},${y} L${x+w-r},${y} Q${x+w},${y} ${x+w},${y+r} L${x+w},${y+h-r} Q${x+w},${y+h} ${x+w-r},${y+h} L${x},${y+h} Z`;
+}
+
+// ---------- chart 1: english by semester ----------
+(function(){
+  const svg = document.getElementById('engChart');
+  const W = 900, H = 260, m = {t:16, r:16, b:44, l:46};
+  const pw = W - m.l - m.r, ph = H - m.t - m.b;
+  const max = 120, ticks = [0, 40, 80, 120];
+  const y = v => m.t + ph - (v/max)*ph;
+  const band = pw / ENG.length, bw = Math.min(24, band*0.42);
+
+  ticks.forEach(t => {
+    el('line', {x1:m.l, x2:m.l+pw, y1:y(t), y2:y(t), class: t===0?'baseline':'gridline'}, svg);
+    el('text', {x:m.l-10, y:y(t)+4, class:'tick', 'text-anchor':'end'}, svg).textContent = t;
+  });
+
+  ENG.forEach((d,i) => {
+    const cx = m.l + band*i + band/2;
+    const g = el('g', {}, svg);
+    if (d.h > 0){
+      const color = d.c===1 ? 'var(--s1)' : 'var(--s2)';
+      el('path', {d: colPath(cx-bw/2, y(d.h), bw, ph-(y(d.h)-m.t), 4), fill: color}, g);
+      el('text', {x:cx, y:y(d.h)-9, class:'dlabel', 'text-anchor':'middle'}, g).textContent = d.h;
+    } else {
+      el('path', {d: colPath(cx-bw/2, y(6), bw, (ph-(y(6)-m.t)), 3), fill:'var(--dim)'}, g);
+      el('text', {x:cx, y:y(6)-9, class:'tick', 'text-anchor':'middle'}, g).textContent = '—';
+    }
+    el('text', {x:cx, y:m.t+ph+22, class:'axlabel', 'text-anchor':'middle'}, svg).textContent = d.sem + ' сем.';
+    const hit = el('rect', {x:cx-band/2, y:m.t, width:band, height:ph, class:'hit'}, g);
+    const body = d.h>0
+      ? `<div class="r"><span class="sw" style="background:${d.c===1?'var(--s1)':'var(--s2)'}"></span>${ENG_NAME[d.c]}<b>${d.h} ч</b></div>`
+      : `<div class="r">Английского в плане нет</div>`;
+    bind(hit, `<div class="t">${d.sem}-й семестр</div>${body}`);
+  });
+  el('text', {x:m.l-38, y:m.t-2, class:'tick'}, svg).textContent = 'ч';
+})();
+
+// ---------- chart 2: semester load, stacked ----------
+(function(){
+  const svg = document.getElementById('loadChart');
+  const lg = document.getElementById('loadLegend');
+  BLOCKS.forEach(b => {
+    const d = document.createElement('div'); d.className = 'item';
+    d.innerHTML = `<span class="sw" style="background:${b.color}"></span>${b.name}`;
+    lg.appendChild(d);
+  });
+
+  const W = 900, H = 330, m = {t:24, r:16, b:48, l:52};
+  const pw = W - m.l - m.r, ph = H - m.t - m.b;
+  const max = 1400, ticks = [0,350,700,1050,1400];
+  const y = v => m.t + ph - (v/max)*ph;
+  const band = pw / LOAD.length, bw = Math.min(24, band*0.42);
+  const GAP = 2;
+
+  ticks.forEach(t => {
+    el('line', {x1:m.l, x2:m.l+pw, y1:y(t), y2:y(t), class: t===0?'baseline':'gridline'}, svg);
+    el('text', {x:m.l-10, y:y(t)+4, class:'tick', 'text-anchor':'end'}, svg).textContent = t.toLocaleString('ru-RU');
+  });
+
+  LOAD.forEach((row,i) => {
+    const cx = m.l + band*i + band/2;
+    const total = BLOCKS.reduce((s,b)=>s+row[b.key],0);
+    let acc = 0;
+    const parts = BLOCKS.filter(b => row[b.key] > 0);
+    parts.forEach((b, k) => {
+      const v = row[b.key];
+      const y0 = y(acc + v), hgt = y(acc) - y0;
+      const isTop = k === parts.length - 1;
+      // верхний сегмент получает скруглённый торец, нижние теряют 2px на зазор
+      const d = isTop
+        ? colPath(cx-bw/2, y0, bw, hgt, 4)
+        : `M${cx-bw/2},${y0} h${bw} v${Math.max(hgt-GAP,0)} h${-bw} Z`;
+      el('path', {d, fill:b.color}, svg);
+      acc += v;
+    });
+    el('text', {x:cx, y:y(total)-10, class:'dlabel', 'text-anchor':'middle'}, svg)
+      .textContent = total.toLocaleString('ru-RU');
+    el('text', {x:cx, y:m.t+ph+22, class:'axlabel', 'text-anchor':'middle'}, svg).textContent = row.sem + ' сем.';
+    el('text', {x:cx, y:m.t+ph+38, class:'tick', 'text-anchor':'middle'}, svg).textContent = ['1 курс','1 курс','2 курс','2 курс','3 курс','3 курс','4 курс','4 курс'][i];
+
+    const rows = BLOCKS.filter(b=>row[b.key]>0)
+      .map(b => `<div class="r"><span class="sw" style="background:${b.color}"></span>${b.name}<b>${row[b.key].toLocaleString('ru-RU')}</b></div>`).join('');
+    const hit = el('rect', {x:cx-band/2, y:m.t, width:band, height:ph, class:'hit'}, svg);
+    bind(hit, `<div class="t">${row.sem}-й семестр — ${total.toLocaleString('ru-RU')} ч</div>${rows}`);
+  });
+  el('text', {x:m.l-44, y:m.t-6, class:'tick'}, svg).textContent = 'ч';
+})();
+
+// ---------- chart 3: top disciplines ----------
+(function(){
+  const svg = document.getElementById('topChart');
+  const top = [...D].sort((a,b)=>b[4]-a[4]).slice(0,16);
+  const W = 900, rowH = 34, m = {t:28, r:70, b:36, l:420};
+  const H = m.t + top.length*rowH + m.b;
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  const pw = W - m.l - m.r;
+  const max = 420, ticks = [0,100,200,300,400];
+  const x = v => m.l + (v/max)*pw;
+  const bh = Math.min(20, rowH*0.56);
+
+  ticks.forEach(t => {
+    el('line', {x1:x(t), x2:x(t), y1:m.t-8, y2:m.t+top.length*rowH, class: t===0?'baseline':'gridline'}, svg);
+    el('text', {x:x(t), y:m.t+top.length*rowH+20, class:'tick', 'text-anchor':'middle'}, svg).textContent = t;
+  });
+  el('text', {x:x(0), y:m.t-16, class:'tick', 'text-anchor':'start'}, svg).textContent = 'академических часов';
+
+  top.forEach((d,i) => {
+    const cy = m.t + i*rowH + rowH/2;
+    const eng = isEng(d);
+    const fill = eng ? (d[1]==='Б1.О.03' ? 'var(--s1)' : 'var(--s2)') : 'var(--dim)';
+    el('path', {d: barPath(x(0), cy-bh/2, x(d[4])-x(0), bh, 4), fill}, svg);
+    const label = d[0].length > 52 ? d[0].slice(0,50)+'…' : d[0];
+    const t = el('text', {x:m.l-14, y:cy+4, 'text-anchor':'end', class:'axlabel'}, svg);
+    t.textContent = label;
+    if (eng) { t.setAttribute('fill','var(--text-primary)'); t.setAttribute('font-weight','600'); }
+    el('text', {x:x(d[4])+10, y:cy+4, class: eng?'dlabel':'tick', 'text-anchor':'start'}, svg).textContent = d[4];
+    const hit = el('rect', {x:0, y:cy-rowH/2, width:W, height:rowH, class:'hit'}, svg);
+    bind(hit, `<div class="t">${d[0]}</div>
+      <div class="r">${d[1]} · ${BLOCK_NAME[d[2]]}</div>
+      <div class="r">Семестры: ${d[3].join(', ')}<b>${d[4]} ч</b></div>
+      <div class="r">Зачётных единиц<b>${d[5]}</b></div>`);
+  });
+})();
+
+// ---------- table ----------
+(function(){
+  const tbody = document.getElementById('tbody');
+  const fSem = document.getElementById('fSem'), fBlock = document.getElementById('fBlock'),
+        fSearch = document.getElementById('fSearch'), fCount = document.getElementById('fCount'),
+        tsum = document.getElementById('tsum');
+  for (let s=1; s<=8; s++) fSem.insertAdjacentHTML('beforeend', `<option value="${s}">${s}-й</option>`);
+  BLOCKS.forEach(b => fBlock.insertAdjacentHTML('beforeend', `<option value="${b.key}">${b.name}</option>`));
+
+  function render(){
+    const s = fSem.value ? +fSem.value : null, b = fBlock.value, q = fSearch.value.trim().toLowerCase();
+    const rows = D.filter(d =>
+      (!s || d[3].includes(s)) && (!b || d[2]===b) &&
+      (!q || d[0].toLowerCase().includes(q) || d[1].toLowerCase().includes(q))
+    ).sort((a,b2)=> b2[4]-a[4]);
+    tbody.innerHTML = rows.map(d => `
+      <tr class="${isEng(d)?'eng':''}">
+        <td>${d[0]}</td>
+        <td style="color:var(--muted);white-space:nowrap">${d[1]}</td>
+        <td><span class="chip"><span class="sw" style="background:${BLOCK_COLOR[d[2]]}"></span>${BLOCK_NAME[d[2]].split(' — ')[0]}</span></td>
+        <td style="white-space:nowrap">${d[3].join(', ')}</td>
+        <td class="num">${d[4]}</td>
+        <td class="num">${d[5]}</td>
+      </tr>`).join('');
+    const h = rows.reduce((a,d)=>a+d[4],0), z = rows.reduce((a,d)=>a+d[5],0);
+    fCount.textContent = `${rows.length} из ${D.length}`;
+    tsum.textContent = `Сумма по выборке: ${h.toLocaleString('ru-RU')} акад. часов · ${z} з.е.`;
+  }
+  [fSem,fBlock].forEach(e=>e.addEventListener('change',render));
+  fSearch.addEventListener('input',render);
+  render();
+})();
+
+// ---------- theme ----------
+document.getElementById('theme').addEventListener('click', () => {
+  const cur = document.documentElement.getAttribute('data-theme');
+  const dark = cur ? cur === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+  document.documentElement.setAttribute('data-theme', dark ? 'light' : 'dark');
+});
+</script>
+</body>
+</html>

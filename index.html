@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Шесть программ РЭУ: сравнение учебных планов</title>
+<style>
+  :root {
+    color-scheme: light;
+    --surface-1: #fcfcfb;
+    --page: #f9f9f7;
+    --text-primary: #0b0b0b;
+    --text-secondary: #52514e;
+    --muted: #898781;
+    --grid: #e1e0d9;
+    --axis: #c3c2b7;
+    --border: rgba(11,11,11,0.10);
+    --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100;
+    --s5: #e87ba4; --s6: #008300; --s7: #4a3aa7;
+    --dim: #d5d4cd;
+    --accent-wash: rgba(42,120,214,0.08);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) {
+      color-scheme: dark;
+      --surface-1: #1a1a19; --page: #0d0d0d;
+      --text-primary: #ffffff; --text-secondary: #c3c2b7; --muted: #898781;
+      --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10);
+      --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500;
+      --s5: #d55181; --s6: #008300; --s7: #9085e9;
+      --dim: #3a3a37;
+      --accent-wash: rgba(57,135,229,0.14);
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --surface-1: #1a1a19; --page: #0d0d0d;
+    --text-primary: #ffffff; --text-secondary: #c3c2b7; --muted: #898781;
+    --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10);
+    --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500;
+    --s5: #d55181; --s6: #008300; --s7: #9085e9;
+    --dim: #3a3a37;
+    --accent-wash: rgba(57,135,229,0.14);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--page); color: var(--text-primary);
+    font: 14px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif;
+    padding: 32px 24px 64px;
+  }
+  .wrap { max-width: 1220px; margin: 0 auto; }
+  header.top { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; margin-bottom: 26px; }
+  h1 { font-size: 22px; font-weight: 600; margin: 0 0 6px; letter-spacing: -0.01em; }
+  .sub { color: var(--text-secondary); font-size: 13px; margin: 0; max-width: 800px; }
+  .meta { color: var(--muted); font-size: 12px; margin-top: 6px; }
+  button.ghost {
+    background: transparent; border: 1px solid var(--border); color: var(--text-secondary);
+    border-radius: 8px; padding: 7px 12px; font: inherit; font-size: 13px; cursor: pointer; white-space: nowrap;
+  }
+  button.ghost:hover { background: var(--surface-1); color: var(--text-primary); }
+
+  .card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; padding: 20px 22px; margin-bottom: 18px; }
+  .card h2 { font-size: 15px; font-weight: 600; margin: 0 0 4px; }
+  .card .note { color: var(--text-secondary); font-size: 12.5px; margin: 0 0 18px; max-width: 900px; }
+  .card h3 { font-size: 13.5px; font-weight: 600; margin: 22px 0 10px; }
+
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 18px; }
+  .tile { background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; }
+  .tile .label { color: var(--text-secondary); font-size: 12.5px; margin-bottom: 8px; }
+  .tile .value { font-size: 30px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.1; }
+  .tile .unit { font-size: 14px; font-weight: 400; color: var(--text-secondary); margin-left: 4px; }
+  .tile .foot { color: var(--muted); font-size: 12px; margin-top: 8px; }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; margin: 0 0 16px; }
+  .legend .item { display: flex; align-items: center; gap: 7px; font-size: 12.5px; color: var(--text-secondary); cursor: default; }
+  .legend .sw { width: 11px; height: 11px; border-radius: 3px; flex: none; }
+
+  svg { display: block; width: 100%; overflow: visible; }
+  .tick { fill: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+  .axlabel { fill: var(--text-secondary); font-size: 11.5px; }
+  .rowname { fill: var(--text-primary); font-size: 12.5px; font-weight: 600; }
+  .rowsub { fill: var(--muted); font-size: 10.5px; }
+  .dlabel { fill: var(--text-primary); font-size: 11.5px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .seglabel { font-size: 10.5px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .gridline { stroke: var(--grid); stroke-width: 1; }
+  .baseline { stroke: var(--axis); stroke-width: 1; }
+  .hit { fill: transparent; }
+
+  #tip {
+    position: fixed; pointer-events: none; opacity: 0; transition: opacity .1s;
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 9px;
+    padding: 10px 12px; font-size: 12.5px; box-shadow: 0 6px 22px rgba(0,0,0,.16); z-index: 50; max-width: 320px;
+  }
+  #tip .t { font-weight: 600; margin-bottom: 6px; }
+  #tip .r { display: flex; align-items: center; gap: 7px; color: var(--text-secondary); }
+  #tip .r b { color: var(--text-primary); font-weight: 600; font-variant-numeric: tabular-nums; margin-left: auto; padding-left: 12px; }
+  #tip .sw { width: 9px; height: 9px; border-radius: 2px; flex: none; }
+  #tip hr { border: none; border-top: 1px solid var(--grid); margin: 7px 0; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  th { text-align: left; font-weight: 600; color: var(--text-secondary); font-size: 11.5px;
+       padding: 9px 8px; border-bottom: 1px solid var(--axis); vertical-align: bottom; }
+  th.num, td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  td { padding: 8px; border-bottom: 1px solid var(--grid); }
+  td.rowlabel { color: var(--text-secondary); white-space: nowrap; }
+  tr.hi td { background: var(--accent-wash); }
+  td b { font-weight: 600; }
+  .best { color: var(--text-primary); font-weight: 600; }
+  .prog-head { display: flex; align-items: center; gap: 6px; }
+  .prog-head .sw { width: 8px; height: 8px; border-radius: 2px; flex: none; }
+
+  .cards2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .pcard { border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; background: var(--surface-1); }
+  .pcard h4 { margin: 0 0 3px; font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+  .pcard h4 .sw { width: 9px; height: 9px; border-radius: 2px; flex: none; }
+  .pcard .code { color: var(--muted); font-size: 11.5px; margin-bottom: 10px; }
+  .pcard p { margin: 0 0 8px; font-size: 12.8px; color: var(--text-secondary); }
+  .pcard p b { color: var(--text-primary); font-weight: 600; }
+  .pcard ul { margin: 6px 0 0; padding-left: 18px; font-size: 12.5px; color: var(--text-secondary); }
+  .pcard li { margin-bottom: 3px; }
+  .tag { display: inline-block; font-size: 11px; padding: 2px 7px; border-radius: 20px;
+         border: 1px solid var(--border); color: var(--text-secondary); margin: 0 4px 4px 0; }
+
+  .prose p { font-size: 13.2px; color: var(--text-secondary); margin: 0 0 12px; max-width: 940px; }
+  .prose p b, .prose strong { color: var(--text-primary); font-weight: 600; }
+  .prose ol, .prose ul { font-size: 13.2px; color: var(--text-secondary); max-width: 940px; padding-left: 20px; }
+  .prose li { margin-bottom: 8px; }
+  .callout { border-left: 3px solid var(--s1); padding: 2px 0 2px 14px; margin: 16px 0; }
+
+  footer { color: var(--muted); font-size: 12px; margin-top: 28px; line-height: 1.7; }
+  a { color: inherit; }
+
+  @media (max-width: 900px) {
+    .kpis { grid-template-columns: 1fr 1fr; }
+    .cards2 { grid-template-columns: 1fr; }
+    body { padding: 20px 14px 48px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <div>
+    <h1>Шесть программ РЭУ им. Г.В. Плеханова — сравнение учебных планов</h1>
+    <p class="sub">Все шесть — бакалавриат, очная форма, 4 года, 240 зачётных единиц. Различаются они не объёмом, а тем, на что эти 240 з.е. потрачены: соотношением математики, статистики, программирования, машинного обучения и экономики.</p>
+    <p class="meta">Планы 2022 года начала подготовки; «Информационная бизнес-аналитика в цифровой среде» — план 2025 года (за 2022 в открытом доступе нет).</p>
+  </div>
+  <button class="ghost" id="theme">Тёмная / светлая</button>
+</header>
+
+<div class="kpis">
+  <div class="tile">
+    <div class="label">Программ в сравнении</div>
+    <div class="value">6</div>
+    <div class="foot">5 направлений подготовки, 2 высшие школы</div>
+  </div>
+  <div class="tile">
+    <div class="label">Математика: разброс</div>
+    <div class="value">972–2 520<span class="unit">ч</span></div>
+    <div class="foot">в 2,6 раза между СиТИИ и ПМИ</div>
+  </div>
+  <div class="tile">
+    <div class="label">Экономика: разброс</div>
+    <div class="value">216–3 168<span class="unit">ч</span></div>
+    <div class="foot">в 15 раз между АиУД и АБД</div>
+  </div>
+  <div class="tile">
+    <div class="label">Английский</div>
+    <div class="value">504<span class="unit">ч у пяти</span></div>
+    <div class="foot">612 ч только у АБД</div>
+  </div>
+</div>
+
+<!-- THEMATIC PROFILE -->
+<div class="card">
+  <h2>Тематический профиль: на что уходят часы блока дисциплин</h2>
+  <p class="note">Блок Б1 целиком (обязательная часть + профильная + проектные модули), в академических часах. Ширина полос сопоставима: у всех программ блок Б1 занимает 7 780–8 212 часов, поэтому разница в сегментах — это прямая разница в содержании.</p>
+  <div class="legend" id="catLegend"></div>
+  <svg id="profileChart" role="img" aria-label="Распределение часов по тематическим блокам в шести программах"></svg>
+  <p class="note" style="margin-top:14px">Классификация дисциплин по темам — авторская: каждая дисциплина плана отнесена к одной категории по названию и содержанию. Суммы по категориям точно сходятся с итогами блока Б1 в каждом плане.</p>
+</div>
+
+<!-- KEY NUMBERS TABLE -->
+<div class="card">
+  <h2>Ключевые цифры планов</h2>
+  <p class="note">Данные взяты из разделов «ПланСвод» и «Сводные данные» каждого учебного плана. У «Аналитики больших данных» лист «Сводные данные» в плане отсутствует — там, где показатель считается только по нему (доля лекций, недельная нагрузка, формы контроля), стоит «н/д». Стоимость и баллы — приём 2025/26 по официальным страницам bakalavr.rea.ru и агрегаторам (наведите на цифру цены — покажется источник). Низкая цена СиТИИ при её технологичности объясняется субсидией федерального проекта «Кадры для цифровой трансформации».</p>
+  <div style="overflow-x:auto"><table id="numTable"></table></div>
+  <h3>Расшифровка аббревиатур</h3>
+  <div class="cards2" style="grid-template-columns:1fr 1fr; gap:6px 24px; font-size:12.5px; color:var(--text-secondary)">
+    <div>
+      <b>ПМИ</b> — Прикладная математика и информатика<br>
+      <b>СиТИИ</b> — Системы и технологии искусственного интеллекта (трек «подготовка специалистов топ-уровня» федпроекта «Кадры для цифровой трансформации», грант Минцифры)<br>
+      <b>АиУД</b> — Аналитика и управление данными<br>
+      <b>ИБА</b> — Информационная бизнес-аналитика в цифровой среде<br>
+      <b>БСА</b> — Бизнес-статистика и аналитика<br>
+      <b>АБД</b> — Аналитика больших данных в экономике (двойное направление: диплом по двум специальностям)
+    </div>
+    <div>
+      <b>ВШКМиС</b> — Высшая школа кибертехнологий, математики и статистики<br>
+      <b>СФТМ «Форсайт»</b> — Специальный факультет талантливой молодёжи «Высшая школа „Форсайт"»<br>
+      <b>каф. ММвЭ</b> — кафедра математических методов в экономике<br>
+      <b>з.е.</b> — зачётная единица (36 акад. часов) · <b>СРС</b> — самостоятельная работа студента<br>
+      <b>Б1 / Б2 / Б3</b> — блоки плана: дисциплины / практика / гос. итоговая аттестация · <b>ФТД</b> — факультативы<br>
+      <b>РАН</b> — Российская академия наук · <b>РИНЦ / GS</b> — базы цитирований (elibrary / Google Scholar)
+    </div>
+  </div>
+</div>
+
+<!-- STRUCTURE -->
+<div class="card">
+  <h2>Структура программы в зачётных единицах</h2>
+  <p class="note">У всех ровно 240 з.е. без факультативов, но нарезаны они по-разному: где-то больше жёстко заданной обязательной части, где-то — профильных дисциплин и практики. Дисциплины проектных модулей входят в Б1.О и Б1.В, поэтому отдельным сегментом не показаны — их объём есть в таблице выше.</p>
+  <div class="legend" id="structLegend"></div>
+  <svg id="structChart" role="img" aria-label="Структура программ по зачётным единицам"></svg>
+</div>
+
+<!-- CONTACT LOAD + ENGLISH -->
+<div class="card">
+  <h2>Контактная работа и доля лекций</h2>
+  <p class="note">Контактная работа блока Б1 — сколько часов студент проводит с преподавателем (лекции, семинары, лабораторные, консультации). Доля лекций — какая часть аудиторного времени читается, а не отрабатывается на практике.</p>
+  <svg id="contactChart" role="img" aria-label="Контактная работа блока дисциплин по программам"></svg>
+</div>
+
+<div class="card">
+  <h2>Английский язык</h2>
+  <p class="note">Схема почти везде одинаковая: общий иностранный язык с 1-го по 4-й семестр (324 ч) плюс язык профессионального общения. Отличается только «Аналитика больших данных» — там профессиональный язык растянут на три семестра.</p>
+  <svg id="engChart" role="img" aria-label="Часы английского языка по программам"></svg>
+</div>
+
+<!-- PROGRAM CARDS -->
+<div class="card">
+  <h2>Чем отличается каждая программа</h2>
+  <p class="note">Профиль в одном абзаце, характерные дисциплины и то, чего в плане нет.</p>
+  <div class="cards2" id="progCards"></div>
+</div>
+
+<!-- FACULTY -->
+<div class="card">
+  <h2>Преподаватели: кто реально стоит за программами</h2>
+  <p class="note">Шесть программ держат три кафедры, поэтому составы пересекаются парами: кафедра статистики ведёт АиУД и БСА, кафедра информатики — СиТИИ и ИБА, кафедра матметодов в экономике — ПМИ и АБД. Чтобы пересечения не завышали оценку, кафедральное ядро учитывается один раз на пару, а сравнивать программы стоит по уникальным для них фигурам.</p>
+  <div class="legend" id="deptLegend"></div>
+  <svg id="facChart" role="img" aria-label="Индекс Хирша ключевых преподавателей"></svg>
+  <p class="note" style="margin-top:10px">Индексы Хирша из разных баз (Google Scholar и РИНЦ) — сравнивать между собой стоит осторожно; у Тихомирова профиль GS частично склеен с однофамильцем, реальные числа ниже. Погоны без наукометрии (чл.-корр. РАН Якобовский, профессор мехмата МГУ Асташова) — в таблице.</p>
+
+  <h3>Ключевые фигуры</h3>
+  <div style="overflow-x:auto"><table id="facTable"></table></div>
+
+  <div class="prose" style="margin-top:20px">
+    <p><b>Кафедра статистики (АиУД, БСА)</b> — самая титулованная «классика»: Зарова (заслуженный деятель науки РФ, член Международного статистического института, h=23), Садовникова и Минашкин — соавторы учебника «Теория статистики», по которому учится вся страна; Минашкин — проректор РЭУ по науке. Слабое место — индустриального data-опыта в открытых профилях почти нет: это школа Росстата, а не продакшн-аналитики.</p>
+    <p><b>Кафедра информатики (СиТИИ, ИБА)</b> — двухслойная. Верх достойный: Садыков — математик международного уровня (PhD Стокгольмского университета, публикации в Compositio Mathematica), Ярушев — живой прикладной ИИ-исследователь с грантом РНФ и связкой с ФИЦ ИУ РАН, Китова — h=21 и центр компетенций IBM. Низ — типовые доценты без научного следа. Обещанные «практики из компаний» поимённо нигде не названы.</p>
+    <p><b>Кафедра ММвЭ + высшая математика (ПМИ)</b> — эконометрическая школа: Тихомиров (заслуженный деятель науки, автор стандартного учебника «Эконометрика»), публикационно активный Моисеев (h=15, международные журналы), Косоруков (школа исследования операций ВМК МГУ) и Асташова — действующий профессор мехмата МГУ. Формальный руководитель программы — администратор без учёной степени.</p>
+    <p><b>АБД («Форсайт»)</b> — то же ядро ММвЭ (зав. кафедрой Максимов и есть руководитель программы), но с уникальным козырем: реальная, а не декларативная связка с РАН. Кафедрой «Моделирование больших систем» заведует член-корреспондент РАН Якобовский — директор Института прикладной математики им. Келдыша, преподают Судаков (ИПМ РАН/МАИ) и Камкин (ИСП РАН). Такого уровня приглашённых учёных нет ни у одной из пяти остальных программ.</p>
+    <p><b>Общие оговорки для всех шести:</b> отзывы студентов о конкретных преподавателях на публичных площадках практически отсутствуют (страницы пустые), поэтому качество преподавания — в отличие от науки — независимо не проверяется. Китова и Титов (декан ВШКМиС) фигурируют на Диссернете как члены диссовета со спорным решением 2020 года — как члены совета, не как авторы заимствований. Наукометрия собрана из открытых профилей; РИНЦ напрямую не сверялся.</p>
+  </div>
+</div>
+
+<!-- ANALYSIS -->
+<div class="card prose">
+  <h2>Анализ: где реальные разломы</h2>
+
+  <div class="callout">
+    <p>Формально это шесть разных программ по пяти направлениям. Содержательно они раскладываются на <b>три пары</b>, и внутри пары различия куда меньше, чем между парами.</p>
+  </div>
+
+  <h3>1. Математическая ось: от 12% до 31% программы</h3>
+  <p><b>ПМИ</b> — единственная программа, где математика занимает почти треть блока дисциплин (2 520 ч). Матанализ там 468 ч против 324 у экономистов и 288 у ИБА, плюс дисциплины, которых больше нигде нет: функциональный анализ, теория случайных процессов, теория оптимального управления, методы приближённых вычислений. На другом конце <b>СиТИИ</b> — 972 ч математики, 12% плана: матанализ ужат до 108 часов, зато почти вся освободившаяся ёмкость ушла в программирование и ИИ.</p>
+  <p>Это главный практический выбор для абитуриента: ПМИ даёт математический аппарат, который потом переносится куда угодно, но требует его тянуть; СиТИИ даёт инструменты и технологии здесь и сейчас, но с тонким теоретическим слоем.</p>
+
+  <h3>2. Статистическая ось: кто действительно учит статистике</h3>
+  <p>Три программы держат статистику как ядро: <b>АиУД</b> (3 528 ч, 44% блока), <b>БСА</b> (2 808 ч, 34%) и <b>ИБА</b> (1 692 ч, 22%). У АиУД есть дисциплина «Статистика» на 468 часов и «Статистические методы Data Science» на 360 — это самые крупные статистические курсы во всей шестёрке. У БСА статистика разложена на два десятка отраслевых курсов: финансов, труда, малого бизнеса, внешней торговли, демографии, целей устойчивого развития.</p>
+  <p>У <b>АБД</b> статистики всего 360 часов — три курса. Название «Аналитика больших данных» здесь означает не статистику, а экономику плюс инструменты: собственно данным и ML отведено 1 008 ч, а экономике — 3 168.</p>
+
+  <h3>3. Экономическая ось: АБД против всех</h3>
+  <p><b>АБД</b> — на 39% экономическая программа. Тридцать с лишним экономических дисциплин, из них большинство по 72 часа: финансы, деньги и кредит, налоговая политика, экономическая география, муниципальная экономика, финансовое право, экономическая безопасность. Это широкий, но мелко нарезанный экономический кругозор — каждая дисциплина по два зачётных единицы, то есть на уровне общего знакомства.</p>
+  <p>Обратный полюс — <b>АиУД</b> с 216 часами экономики на всю программу (два курса). Формально это направление «Статистика», и экономика в нём не профильная.</p>
+
+  <h3>4. Проектные модули: есть не у всех</h3>
+  <p>У четырёх программ (СиТИИ, АиУД, ПМИ, ИБА) в плане отдельным блоком стоит проектный модуль — сквозная работа на 20–27 з.е., которая тянется несколько семестров и заканчивается междисциплинарным проектом. У <b>БСА</b> и <b>АБД</b> проектных модулей нет вообще: вместо них — обычные дисциплины и курсовые.</p>
+  <p>Это заметная разница в формате: проектный модуль — это то, что потом кладётся в портфолио, а не в зачётку.</p>
+
+  <h3>5. Практика: разброс вдвое</h3>
+  <p>От 12 з.е. (432 ч) у БСА до 24 з.е. (864 ч) у ИБА. У ИБА производственная практика — 432 часа плюс научно-исследовательская работа, у СиТИИ практика 21 з.е. и включает НИР в 6-м семестре. У БСА практика минимальная из всех и целиком собрана в 4-м и 8-м семестрах.</p>
+
+  <h3>6. Нагрузка и режим</h3>
+  <p><b>СиТИИ</b> заметно легче по аудиторной нагрузке — 17,9 ч/нед против 20,8–21,4 у остальных, и доля лекций там самая низкая (32,4%). То есть больше практических занятий и больше самостоятельной работы. Самая «лекционная» программа — <b>БСА</b> (41,1% лекций) и она же с самой высокой суммарной контактной работой блока Б1 (3 309 ч).</p>
+  <p>По числу экзаменов лидируют математические программы: ПМИ и АиУД — по 32 экзамена за четыре года, у БСА и СиТИИ — 29, у ИБА — 26.</p>
+
+  <h3>7. Свобода выбора</h3>
+  <p>Доля обязательной части (то, что нельзя не изучать) колеблется от 51,2% у БСА до 62,1% у ПМИ и АиУД. У БСА больше всего профильных дисциплин, формируемых участниками образовательных отношений — 102 з.е. против 76 у ПМИ. Парадокс в том, что «свобода» здесь означает не выбор студента, а гибкость кафедры: реального выбора между дисциплинами в планах немного — обычно две-три пары элективов за всю программу.</p>
+
+  <h3>Кому что подходит</h3>
+  <ul>
+    <li><b>Сильная математика, любая дальнейшая специализация</b> — ПМИ. Больше всего фундамента, дороже всего по усилиям.</li>
+    <li><b>ML-инженерия и системы ИИ</b> — СиТИИ. Лучший набор технологических курсов (компьютерное зрение, NLP, распознавание речи, глубокое обучение, рекомендательные системы), самая лёгкая нагрузка, слабейшая математика.</li>
+    <li><b>Профессия «аналитик данных» с сильной статистикой</b> — АиУД. Статистика как ремесло, Data Science-методы, минимум экономики.</li>
+    <li><b>Отраслевая статистика и госсектор</b> — БСА. Прикладная статистика по отраслям, сильная экономическая база, много лекций.</li>
+    <li><b>Бизнес-аналитик на стыке ИТ и процессов</b> — ИБА. Ровный баланс всех четырёх областей, крупнейшая практика, современнейший план из шести.</li>
+    <li><b>Экономист, умеющий работать с данными</b> — АБД. Широчайшая экономическая подготовка, инструменты данных как надстройка, а не ядро.</li>
+  </ul>
+</div>
+
+<footer>
+  Источники — официальные учебные планы РЭУ им. Г.В. Плеханова, раздел «Сведения об образовательной организации»:
+  СиТИИ <code>UchPlan_09.03.02_ISIT_2022.pdf</code> · АиУД <code>Uch_plan_01.03.05_S_AiUD.pdf</code> ·
+  ПМИ <code>UchPlan_01.03.02_PMI_PMI_2022.pdf</code> · АБД <code>Uch_plan_ABD_v_Econom_2022.pdf</code> ·
+  БСА <code>UchPlan_38.03.01_Ec_BSA_2022.pdf</code> · ИБА <code>Uch_plan_38.03.05_ИБА_2025.pdf</code>.<br>
+  1 зачётная единица = 36 академических часов. Часы блока Б1 включают элективные дисциплины по физкультуре (328 ч), которые зачётных единиц не дают.
+</footer>
+
+</div>
+<div id="tip" role="tooltip"></div>
+
+<script>
+// ---------- data ----------
+const PROGS = [
+  {key:'PMI',  short:'ПМИ',   name:'Прикладная математика и информатика', code:'01.03.02', school:'ВШКМиС · каф. ММвЭ + высшей математики', year:2022, color:'var(--s1)'},
+  {key:'SITII',short:'СиТИИ', name:'Системы и технологии искусственного интеллекта', code:'09.03.02', school:'ВШКМиС · каф. информатики · федпроект «топ-уровень»', year:2022, color:'var(--s2)'},
+  {key:'AiUD', short:'АиУД',  name:'Аналитика и управление данными', code:'01.03.05', school:'ВШКМиС · каф. статистики', year:2022, color:'var(--s3)'},
+  {key:'IBA',  short:'ИБА',   name:'Информационная бизнес-аналитика в цифровой среде', code:'38.03.05', school:'ВШКМиС · каф. информатики', year:2025, color:'var(--s4)'},
+  {key:'BSA',  short:'БСА',   name:'Бизнес-статистика и аналитика', code:'38.03.01', school:'ВШКМиС · каф. статистики', year:2022, color:'var(--s5)'},
+  {key:'ABD',  short:'АБД',   name:'Аналитика больших данных в экономике', code:'38.03.01 + 01.03.02', school:'СФТМ «Форсайт» · каф. ММвЭ + РАН', year:2022, color:'var(--s7)'},
+];
+
+const CATS = [
+  {key:'math',  name:'Математика',                 color:'var(--s1)'},
+  {key:'stat',  name:'Статистика и эконометрика',  color:'var(--s2)'},
+  {key:'it',    name:'Программирование и ИТ',      color:'var(--s3)'},
+  {key:'ml',    name:'Данные, ML и ИИ',            color:'var(--s4)'},
+  {key:'econ',  name:'Экономика и менеджмент',     color:'var(--s5)'},
+  {key:'lang',  name:'Иностранный язык',           color:'var(--s6)'},
+  {key:'gen',   name:'Общая подготовка',           color:'var(--s7)'},
+];
+
+// часы блока Б1 (обязательная + профильная + проектные модули)
+const PROFILE = {
+  PMI:   {math:2520, stat:648,  it:1224, ml:1476, econ:684,  lang:504, gen:1048},
+  SITII: {math:972,  stat:0,    it:2124, ml:2268, econ:900,  lang:504, gen:1120},
+  AiUD:  {math:1224, stat:3528, it:828,  ml:720,  econ:216,  lang:504, gen:1084},
+  IBA:   {math:1296, stat:1692, it:1404, ml:720,  econ:972,  lang:504, gen:1192},
+  BSA:   {math:1080, stat:2808, it:216,  ml:684,  econ:1800, lang:504, gen:1120},
+  ABD:   {math:1332, stat:360,  it:612,  ml:1008, econ:3168, lang:612, gen:1012},
+};
+
+// структура в з.е.
+const STRUCT_PARTS = [
+  {key:'ob',   name:'Обязательная часть Б1.О',  color:'var(--s1)'},
+  {key:'var',  name:'Профильная часть Б1.В',    color:'var(--s2)'},
+  {key:'prac', name:'Практика',                 color:'var(--s4)'},
+  {key:'gia',  name:'Итоговая аттестация',      color:'var(--s5)'},
+];
+// дисциплины проектного модуля учтены внутри Б1.О / Б1.В — отдельным сегментом их считать нельзя
+const STRUCT = {
+  PMI:   {ob:140, var:76,  prac:15, gia:9},
+  SITII: {ob:126, var:84,  prac:21, gia:9},
+  AiUD:  {ob:140, var:76,  prac:15, gia:9},
+  IBA:   {ob:116, var:91,  prac:24, gia:9},
+  BSA:   {ob:117, var:102, prac:12, gia:9},
+  ABD:   {ob:136, var:80,  prac:15, gia:9},
+};
+const PM_ZE = {PMI:27, SITII:22, AiUD:24, IBA:20, BSA:0, ABD:0};
+
+const NUMS = {
+  //            Б1 з.е, конт.раб Б1 ч, ауд ч/нед, лекции %, обяз.часть %, экз, зач, ЗаО, англ ч, практика ч, ФТД з.е.
+  PMI:   {b1:216, cont:3147, aud:20.9, lect:37.4, mand:62.1, exam:32, zach:14, zao:16, eng:504, prac:540, ftd:4, price:320, priceNote:'bakalavr.rea.ru, приём 2026', score:267, seats:null},
+  SITII: {b1:210, cont:2823, aud:17.9, lect:32.4, mand:58.8, exam:29, zach:19, zao:14, eng:504, prac:756, ftd:7, price:330, priceNote:'bakalavr.rea.ru, приём 2026; федпроект субсидирует', score:240, seats:'70 бюджетных / 110 платных'},
+  AiUD:  {b1:216, cont:3159, aud:20.8, lect:37.7, mand:62.1, exam:32, zach:15, zao:16, eng:504, prac:540, ftd:4, price:450, priceNote:'ucheba.ru, приём 2025/26', score:278, seats:'5 бюджетных / 70 платных'},
+  IBA:   {b1:207, cont:3028, aud:21.4, lect:39.3, mand:55.8, exam:26, zach:25, zao:16, eng:504, prac:864, ftd:6, price:null, priceNote:'профиль новый, цена не опубликована; соседний профиль 38.03.05 — 370 тыс.', score:284, seats:'квота 3 бюджетных (2025)'},
+  BSA:   {b1:219, cont:3309, aud:21.1, lect:41.1, mand:51.2, exam:29, zach:23, zao:15, eng:504, prac:432, ftd:7, price:380, priceNote:'bakalavr.rea.ru, приём 2026', score:264, seats:null},
+  ABD:   {b1:216, cont:3259, aud:null, lect:null, mand:null, exam:null, zach:null, zao:null, eng:612, prac:540, ftd:7, price:580, priceNote:'rea.ru, приём 2026', score:null, seats:'16 бюджетных / 10 платных'},
+};
+
+const ENG = {
+  PMI:   {base:324, prof:180, semsBase:'1–4', semsProf:'5–6'},
+  SITII: {base:324, prof:180, semsBase:'1–4', semsProf:'5–6'},
+  AiUD:  {base:324, prof:180, semsBase:'1–4', semsProf:'5–6'},
+  IBA:   {base:324, prof:180, semsBase:'1–4', semsProf:'5–6'},
+  BSA:   {base:324, prof:180, semsBase:'1–4', semsProf:'5–6'},
+  ABD:   {base:324, prof:288, semsBase:'1–4', semsProf:'5–7'},
+};
+
+const CARDS = {
+  PMI: {
+    lead: 'Самая математическая программа шестёрки. Математика — <b>2 520 ч, 31%</b> блока дисциплин: матанализ на 468 часов (в полтора раза больше, чем у экономистов), линейная алгебра 252, дифференциальные уравнения 216.',
+    only: ['Функциональный анализ', 'Теория случайных процессов', 'Теория оптимального управления', 'Методы приближённых вычислений', 'Теория игр'],
+    also: 'Проектный модуль «Моделирование социально-экономических систем» — 972 ч, самый крупный из всех, с эконометрикой на 360 часов внутри.',
+    lack: 'Отраслевой статистики почти нет: вся статистика — 648 ч (статистика, эконометрика, многомерные методы).'
+  },
+  SITII: {
+    lead: 'Самая технологическая и при этом самая разгруженная: <b>17,9 ч/нед</b> аудиторных против 21 у остальных, лекций всего 32%. Программирование и ИИ занимают <b>56%</b> блока — больше, чем у кого-либо.',
+    only: ['Технологии компьютерного зрения', 'Технологии распознавания и синтеза речи', 'Обработка естественного языка', 'Глубокое обучение', 'Нейронные сети', 'Рекомендательные системы', 'Основы cognitive science', 'Инженерия знаний'],
+    also: 'Разработка приложений на Python (180 ч) и на C++/C# (180 ч) — единственная программа, где два языковых курса такого объёма.',
+    lack: 'Статистики как отдельного предмета нет вообще. Матанализ ужат до 108 ч — вчетверо меньше, чем у ПМИ.'
+  },
+  AiUD: {
+    lead: 'Статистика как ремесло: <b>3 528 ч, 44%</b> блока — максимум среди шести. Курс «Статистика» на 468 ч и «Статистические методы Data Science» на 360 ч — крупнейшие профильные курсы во всей выборке.',
+    only: ['Статистический анализ нечисловой информации', 'Статанализ пространственно-распределённых данных', 'Непараметрические методы', 'Методы экспертного оценивания', 'Текстомайнинг в анализе', 'Статистика новых форм занятости'],
+    also: 'Два проектных модуля: моделирование ВЭД (432 ч) и прикладные исследования финансового сектора (432 ч).',
+    lack: 'Экономики всего 216 ч — два курса на всю программу, минимум из шести. Программирование скромное: базы данных, R и Python, компьютерная графика.'
+  },
+  IBA: {
+    lead: 'Самая сбалансированная: ни одна тема не доминирует — статистика 22%, ИТ 18%, математика 17%, экономика 12%, ML 9%. Единственный план 2025 года, и это видно по содержанию.',
+    only: ['Облачные вычисления и сервисы', 'Нейросетевое прогнозирование разночастотных временных рядов', 'Нечисловые данные в аналитике бизнес-процессов', 'Прогнозирование логистических потоков', 'Интерактивные инструменты обработки данных', 'Основы военной подготовки'],
+    also: 'Самая большая практика — <b>864 ч (24 з.е.)</b>, вдвое больше, чем у БСА. Есть тайм-менеджмент и лидерство как отдельные дисциплины.',
+    lack: 'Наименьший блок дисциплин (7 780 ч) — за счёт того, что часы ушли в практику.'
+  },
+  BSA: {
+    lead: 'Отраслевая статистика в чистом виде: <b>2 808 ч</b> статистики, разложенной на два десятка узких курсов, плюс <b>1 800 ч</b> экономики. Самая лекционная программа (41,1%) и самая высокая контактная нагрузка блока Б1 — 3 309 ч.',
+    only: ['Статистика финансов', 'Статистика внешней торговли', 'Статистика малого и среднего бизнеса', 'Статистика целей устойчивого развития', 'Статистика труда и персонала', 'Демография', 'Рейтинговые системы в аналитике', 'Выборочное обследование в SPSS'],
+    also: 'Наибольшая профильная часть — 102 з.е., то есть самая низкая доля жёстко обязательных дисциплин (51,2%).',
+    lack: 'Программирование почти отсутствует: 216 ч на ИТ-курсы. Проектного модуля нет, практика минимальная — 432 ч.'
+  },
+  ABD: {
+    lead: 'Вопреки названию — прежде всего экономическая программа: <b>3 168 ч, 39%</b> блока отданы экономике и финансам, разложенным на три десятка курсов по 72 часа каждый. Данным, ML и ИИ отведено 1 008 ч.',
+    only: ['Экономическая география', 'Финансы общественного сектора', 'Муниципальная экономика', 'Налоговая политика', 'Экономическая безопасность России', 'Управление страховыми рисками', 'Семантические модели данных'],
+    also: 'Единственная программа с расширенным английским — 612 ч: профессиональный язык идёт три семестра вместо двух. Реализуется факультетом «Форсайт», а не ВШКМиС.',
+    lack: 'Статистики всего 360 ч — три курса. Многие экономические дисциплины по 2 з.е., то есть на уровне обзора.'
+  },
+};
+
+// ---------- helpers ----------
+const SVGNS = 'http://www.w3.org/2000/svg';
+function el(tag, attrs, parent){
+  const n = document.createElementNS(SVGNS, tag);
+  for (const k in attrs) n.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(n);
+  return n;
+}
+function barPath(x, y, w, h, r){
+  if (w <= 0) return '';
+  r = Math.min(r, w, h/2);
+  return `M${x},${y} L${x+w-r},${y} Q${x+w},${y} ${x+w},${y+r} L${x+w},${y+h-r} Q${x+w},${y+h} ${x+w-r},${y+h} L${x},${y+h} Z`;
+}
+const fmt = n => n.toLocaleString('ru-RU');
+
+const tip = document.getElementById('tip');
+function showTip(e, html){ tip.innerHTML = html; tip.style.opacity = 1; moveTip(e); }
+function moveTip(e){
+  const pad = 14, w = tip.offsetWidth, h = tip.offsetHeight;
+  let x = e.clientX + pad, y = e.clientY + pad;
+  if (x + w > innerWidth - 8) x = e.clientX - w - pad;
+  if (y + h > innerHeight - 8) y = e.clientY - h - pad;
+  tip.style.left = x + 'px'; tip.style.top = y + 'px';
+}
+function hideTip(){ tip.style.opacity = 0; }
+function bind(node, html){
+  node.addEventListener('mouseenter', e => showTip(e, html));
+  node.addEventListener('mousemove', moveTip);
+  node.addEventListener('mouseleave', hideTip);
+  node.setAttribute('tabindex','0');
+  node.addEventListener('focus', () => {
+    const r = node.getBoundingClientRect();
+    showTip({clientX:r.left + Math.min(r.width/2, 200), clientY:r.top}, html);
+  });
+  node.addEventListener('blur', hideTip);
+}
+
+// ---------- chart 1: thematic profile (stacked horizontal) ----------
+(function(){
+  const svg = document.getElementById('profileChart');
+  const lg = document.getElementById('catLegend');
+  CATS.forEach(c => {
+    const d = document.createElement('div'); d.className = 'item';
+    d.innerHTML = `<span class="sw" style="background:${c.color}"></span>${c.name}`;
+    lg.appendChild(d);
+  });
+
+  const W = 1160, rowH = 62, m = {t:34, r:24, b:40, l:150};
+  const H = m.t + PROGS.length*rowH + m.b;
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  const pw = W - m.l - m.r;
+  const max = 8400, ticks = [0,2000,4000,6000,8000];
+  const x = v => m.l + (v/max)*pw;
+  const bh = 26, GAP = 2;
+
+  ticks.forEach(t => {
+    el('line', {x1:x(t), x2:x(t), y1:m.t-14, y2:m.t+PROGS.length*rowH-14, class: t===0?'baseline':'gridline'}, svg);
+    el('text', {x:x(t), y:m.t+PROGS.length*rowH+4, class:'tick', 'text-anchor':'middle'}, svg).textContent = fmt(t);
+  });
+  el('text', {x:m.l, y:m.t-24, class:'tick', 'text-anchor':'start'}, svg).textContent = 'академических часов блока Б1';
+
+  PROGS.forEach((p, i) => {
+    const y0 = m.t + i*rowH - 14 + (rowH - bh)/2;
+    const prof = PROFILE[p.key];
+    const total = CATS.reduce((s,c)=>s+prof[c.key],0);
+    el('text', {x:m.l-14, y:y0+11, class:'rowname', 'text-anchor':'end'}, svg).textContent = p.short;
+    el('text', {x:m.l-14, y:y0+25, class:'rowsub', 'text-anchor':'end'}, svg).textContent = p.code.split(' ')[0];
+
+    let acc = 0;
+    const parts = CATS.filter(c => prof[c.key] > 0);
+    parts.forEach((c, k) => {
+      const v = prof[c.key];
+      const x0 = x(acc), w = x(acc+v) - x0;
+      const isLast = k === parts.length - 1;
+      const drawW = isLast ? w : Math.max(w - GAP, 0);
+      const d = isLast ? barPath(x0, y0, drawW, bh, 4) : `M${x0},${y0} h${drawW} v${bh} h${-drawW} Z`;
+      el('path', {d, fill:c.color}, svg);
+      // подпись внутри сегмента — только если гарантированно влезает
+      const label = fmt(v);
+      if (drawW > label.length * 7 + 16) {
+        const t = el('text', {x:x0 + drawW/2, y:y0 + bh/2 + 4, class:'seglabel', 'text-anchor':'middle',
+                              fill: (c.key==='math'||c.key==='econ'||c.key==='gen'||c.key==='lang') ? '#ffffff' : '#0b0b0b'}, svg);
+        t.textContent = label;
+      }
+      acc += v;
+    });
+    el('text', {x:x(total)+10, y:y0+bh/2+4, class:'dlabel'}, svg).textContent = fmt(total);
+
+    const rows = CATS.map(c => {
+      const v = prof[c.key];
+      const pct = (v/total*100).toFixed(1).replace('.', ',');
+      return `<div class="r"><span class="sw" style="background:${c.color}"></span>${c.name}<b>${v ? fmt(v)+' ч · '+pct+'%' : '—'}</b></div>`;
+    }).join('');
+    const hit = el('rect', {x:0, y:m.t + i*rowH - 14, width:W, height:rowH, class:'hit'}, svg);
+    bind(hit, `<div class="t">${p.name}</div><div class="r">${p.code} · ${p.school} · план ${p.year}</div><hr>${rows}<hr><div class="r">Блок Б1 всего<b>${fmt(total)} ч</b></div>`);
+  });
+})();
+
+// ---------- chart 2: structure (stacked, з.е.) ----------
+(function(){
+  const svg = document.getElementById('structChart');
+  const lg = document.getElementById('structLegend');
+  STRUCT_PARTS.forEach(c => {
+    const d = document.createElement('div'); d.className = 'item';
+    d.innerHTML = `<span class="sw" style="background:${c.color}"></span>${c.name}`;
+    lg.appendChild(d);
+  });
+
+  const W = 1160, rowH = 46, m = {t:30, r:24, b:38, l:150};
+  const H = m.t + PROGS.length*rowH + m.b;
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  const pw = W - m.l - m.r;
+  const max = 250, ticks = [0,60,120,180,240];
+  const x = v => m.l + (v/max)*pw;
+  const bh = 20, GAP = 2;
+
+  ticks.forEach(t => {
+    el('line', {x1:x(t), x2:x(t), y1:m.t-12, y2:m.t+PROGS.length*rowH-12, class: t===0?'baseline':'gridline'}, svg);
+    el('text', {x:x(t), y:m.t+PROGS.length*rowH+6, class:'tick', 'text-anchor':'middle'}, svg).textContent = t;
+  });
+  el('text', {x:m.l, y:m.t-20, class:'tick', 'text-anchor':'start'}, svg).textContent = 'зачётных единиц (без факультативов)';
+
+  PROGS.forEach((p, i) => {
+    const y0 = m.t + i*rowH - 12 + (rowH - bh)/2;
+    const s = STRUCT[p.key];
+    const total = STRUCT_PARTS.reduce((a,c)=>a+s[c.key],0);
+    el('text', {x:m.l-14, y:y0+14, class:'rowname', 'text-anchor':'end'}, svg).textContent = p.short;
+
+    let acc = 0;
+    const parts = STRUCT_PARTS.filter(c => s[c.key] > 0);
+    parts.forEach((c,k) => {
+      const v = s[c.key];
+      const x0 = x(acc), w = x(acc+v)-x0;
+      const isLast = k === parts.length-1;
+      const drawW = isLast ? w : Math.max(w-GAP, 0);
+      const d = isLast ? barPath(x0, y0, drawW, bh, 4) : `M${x0},${y0} h${drawW} v${bh} h${-drawW} Z`;
+      el('path', {d, fill:c.color}, svg);
+      if (drawW > 26) {
+        el('text', {x:x0+drawW/2, y:y0+bh/2+4, class:'seglabel', 'text-anchor':'middle',
+                    fill:(c.key==='ob'||c.key==='var') ? '#ffffff' : '#0b0b0b'}, svg).textContent = v;
+      }
+      acc += v;
+    });
+    el('text', {x:x(total)+10, y:y0+bh/2+4, class:'dlabel'}, svg).textContent = total;
+
+    const rows = STRUCT_PARTS.map(c =>
+      `<div class="r"><span class="sw" style="background:${c.color}"></span>${c.name}<b>${s[c.key] ? s[c.key]+' з.е.' : '—'}</b></div>`).join('');
+    const hit = el('rect', {x:0, y:m.t+i*rowH-12, width:W, height:rowH, class:'hit'}, svg);
+    bind(hit, `<div class="t">${p.name}</div>${rows}<hr><div class="r">Итого<b>${total} з.е.</b></div>`);
+  });
+})();
+
+// ---------- chart 3: contact work ----------
+(function(){
+  const svg = document.getElementById('contactChart');
+  const W = 1160, m = {t:30, r:24, b:56, l:60};
+  const H = 300;
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  const pw = W - m.l - m.r, ph = H - m.t - m.b;
+  const max = 3600, ticks = [0,900,1800,2700,3600];
+  const y = v => m.t + ph - (v/max)*ph;
+  const band = pw / PROGS.length, bw = 24;
+
+  ticks.forEach(t => {
+    el('line', {x1:m.l, x2:m.l+pw, y1:y(t), y2:y(t), class: t===0?'baseline':'gridline'}, svg);
+    el('text', {x:m.l-10, y:y(t)+4, class:'tick', 'text-anchor':'end'}, svg).textContent = fmt(t);
+  });
+  el('text', {x:m.l-52, y:m.t-12, class:'tick', 'text-anchor':'start'}, svg).textContent = 'ч контактной работы, блок Б1';
+
+  PROGS.forEach((p,i) => {
+    const cx = m.l + band*i + band/2;
+    const n = NUMS[p.key];
+    const h = ph - (y(n.cont) - m.t);
+    el('path', {d:`M${cx-bw/2},${y(n.cont)+h} L${cx-bw/2},${y(n.cont)+4} Q${cx-bw/2},${y(n.cont)} ${cx-bw/2+4},${y(n.cont)} L${cx+bw/2-4},${y(n.cont)} Q${cx+bw/2},${y(n.cont)} ${cx+bw/2},${y(n.cont)+4} L${cx+bw/2},${y(n.cont)+h} Z`, fill:p.color}, svg);
+    el('text', {x:cx, y:y(n.cont)-9, class:'dlabel', 'text-anchor':'middle'}, svg).textContent = fmt(n.cont);
+    el('text', {x:cx, y:m.t+ph+22, class:'axlabel', 'text-anchor':'middle'}, svg).textContent = p.short;
+    el('text', {x:cx, y:m.t+ph+38, class:'tick', 'text-anchor':'middle'}, svg).textContent =
+      n.lect ? `лекций ${String(n.lect).replace('.',',')}%` : 'лекций н/д';
+    const hit = el('rect', {x:cx-band/2, y:m.t, width:band, height:ph, class:'hit'}, svg);
+    bind(hit, `<div class="t">${p.name}</div>
+      <div class="r">Контактная работа Б1<b>${fmt(n.cont)} ч</b></div>
+      <div class="r">Аудиторная нагрузка<b>${n.aud ? String(n.aud).replace('.',',')+' ч/нед' : 'н/д'}</b></div>
+      <div class="r">Доля лекций<b>${n.lect ? String(n.lect).replace('.',',')+'%' : 'н/д'}</b></div>
+      <div class="r">Экзаменов за 4 года<b>${n.exam ?? 'н/д'}</b></div>`);
+  });
+})();
+
+// ---------- chart 4: english ----------
+(function(){
+  const svg = document.getElementById('engChart');
+  const W = 1160, m = {t:34, r:24, b:44, l:60};
+  const H = 250;
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  const pw = W - m.l - m.r, ph = H - m.t - m.b;
+  const max = 700, ticks = [0,200,400,600];
+  const y = v => m.t + ph - (v/max)*ph;
+  const band = pw / PROGS.length, bw = 24, GAP = 2;
+
+  ticks.forEach(t => {
+    el('line', {x1:m.l, x2:m.l+pw, y1:y(t), y2:y(t), class: t===0?'baseline':'gridline'}, svg);
+    el('text', {x:m.l-10, y:y(t)+4, class:'tick', 'text-anchor':'end'}, svg).textContent = t;
+  });
+  const lgY = m.t - 16;
+  el('rect', {x:m.l, y:lgY-9, width:11, height:11, rx:3, fill:'var(--s1)'}, svg);
+  el('text', {x:m.l+18, y:lgY, class:'axlabel'}, svg).textContent = 'Иностранный язык, 1–4 семестры';
+  el('rect', {x:m.l+250, y:lgY-9, width:11, height:11, rx:3, fill:'var(--s2)'}, svg);
+  el('text', {x:m.l+268, y:lgY, class:'axlabel'}, svg).textContent = 'Язык профессионального общения';
+
+  PROGS.forEach((p,i) => {
+    const cx = m.l + band*i + band/2;
+    const e = ENG[p.key], total = e.base + e.prof;
+    // нижний сегмент — базовый курс
+    const yTopAll = y(total), yBase = y(e.base);
+    el('path', {d:`M${cx-bw/2},${yBase} h${bw} v${(m.t+ph)-yBase} h${-bw} Z`, fill:'var(--s1)'}, svg);
+    const profH = yBase - yTopAll - GAP;
+    el('path', {d:`M${cx-bw/2},${yTopAll+4} Q${cx-bw/2},${yTopAll} ${cx-bw/2+4},${yTopAll} L${cx+bw/2-4},${yTopAll} Q${cx+bw/2},${yTopAll} ${cx+bw/2},${yTopAll+4} L${cx+bw/2},${yTopAll+Math.max(profH,4)} L${cx-bw/2},${yTopAll+Math.max(profH,4)} Z`, fill:'var(--s2)'}, svg);
+    el('text', {x:cx, y:yTopAll-9, class:'dlabel', 'text-anchor':'middle'}, svg).textContent = total;
+    el('text', {x:cx, y:m.t+ph+22, class:'axlabel', 'text-anchor':'middle'}, svg).textContent = p.short;
+    const hit = el('rect', {x:cx-band/2, y:m.t, width:band, height:ph, class:'hit'}, svg);
+    bind(hit, `<div class="t">${p.name}</div>
+      <div class="r"><span class="sw" style="background:var(--s1)"></span>Иностранный язык (сем. ${e.semsBase})<b>${e.base} ч</b></div>
+      <div class="r"><span class="sw" style="background:var(--s2)"></span>Проф. общения (сем. ${e.semsProf})<b>${e.prof} ч</b></div>
+      <hr><div class="r">Всего<b>${total} ч · ${Math.round(total/36*10)/10} з.е.</b></div>`);
+  });
+})();
+
+// ---------- table ----------
+(function(){
+  const t = document.getElementById('numTable');
+  const ROWS = [
+    {label:'Направление подготовки', get:p => p.code, raw:true},
+    {label:'Школа и кафедра', get:p => p.school, raw:true},
+    {label:'Год начала подготовки (план)', get:p => p.year, raw:true},
+    {label:'Стоимость, тыс. ₽/год', get:p => NUMS[p.key].price, price:true},
+    {label:'Проходной балл (бюджет)', get:p => NUMS[p.key].score},
+    {label:'Места', get:p => NUMS[p.key].seats || '—', raw:true},
+    {label:'Блок дисциплин Б1, з.е.', get:p => NUMS[p.key].b1, max:true},
+    {label:'в т.ч. проектный модуль, з.е.', get:p => PM_ZE[p.key] || '—', max:true},
+    {label:'Контактная работа Б1, ч', get:p => NUMS[p.key].cont, max:true},
+    {label:'Аудиторная нагрузка, ч/нед', get:p => NUMS[p.key].aud, dec:true},
+    {label:'Доля лекций от аудиторных', get:p => NUMS[p.key].lect, pct:true},
+    {label:'Обязательная часть от программы', get:p => NUMS[p.key].mand, pct:true},
+    {label:'Экзаменов за 4 года', get:p => NUMS[p.key].exam},
+    {label:'Зачётов', get:p => NUMS[p.key].zach},
+    {label:'Зачётов с оценкой', get:p => NUMS[p.key].zao},
+    {label:'Практика, ч', get:p => NUMS[p.key].prac, max:true},
+    {label:'Факультативы, з.е.', get:p => NUMS[p.key].ftd},
+    {label:'Английский, ч', get:p => NUMS[p.key].eng, max:true, hi:true},
+  ];
+  let html = '<thead><tr><th></th>' + PROGS.map(p =>
+    `<th class="num"><span class="prog-head" style="justify-content:flex-end"><span class="sw" style="background:${p.color}"></span>${p.short}</span></th>`).join('') + '</tr></thead><tbody>';
+  ROWS.forEach(r => {
+    const vals = PROGS.map(p => r.get(p));
+    const nums = vals.filter(v => typeof v === 'number');
+    const top = nums.length ? Math.max(...nums) : null;
+    html += `<tr class="${r.hi?'hi':''}"><td class="rowlabel">${r.label}</td>` + vals.map((v, ci) => {
+      if (v === null || v === undefined) return '<td class="num" style="color:var(--muted)">н/д</td>';
+      if (r.raw) return `<td class="num" style="font-size:11.5px">${v}</td>`;
+      if (r.price) return `<td class="num" title="${NUMS[PROGS[ci].key].priceNote || ''}"><b>${v}</b></td>`;
+      let s = r.pct ? String(v).replace('.', ',') + '%' : (r.dec ? String(v).replace('.', ',') : fmt(v));
+      const cls = (r.max && v === top) ? 'num best' : 'num';
+      return `<td class="${cls}">${s}</td>`;
+    }).join('') + '</tr>';
+  });
+  html += '</tbody>';
+  t.innerHTML = html;
+})();
+
+// ---------- program cards ----------
+(function(){
+  const box = document.getElementById('progCards');
+  PROGS.forEach(p => {
+    const c = CARDS[p.key];
+    const d = document.createElement('div');
+    d.className = 'pcard';
+    d.innerHTML = `
+      <h4><span class="sw" style="background:${p.color}"></span>${p.name}</h4>
+      <div class="code">${p.code} · ${p.school} · план ${p.year} г.</div>
+      <p>${c.lead}</p>
+      <p><b>Есть только здесь:</b><br>${c.only.map(x=>`<span class="tag">${x}</span>`).join('')}</p>
+      <p>${c.also}</p>
+      <p style="color:var(--muted)"><b style="color:var(--text-secondary)">Чего мало:</b> ${c.lack}</p>`;
+    box.appendChild(d);
+  });
+})();
+
+// ---------- faculty ----------
+const DEPTS = [
+  {key:'stat', name:'Каф. статистики (АиУД, БСА)',        color:'var(--s3)'},
+  {key:'inf',  name:'Каф. информатики (СиТИИ, ИБА)',      color:'var(--s2)'},
+  {key:'mme',  name:'Каф. ММвЭ (ПМИ, АБД)',               color:'var(--s1)'},
+  {key:'vm',   name:'Каф. высшей математики (ПМИ)',       color:'var(--s5)'},
+  {key:'ran',  name:'Институты РАН (АБД)',                color:'var(--s7)'},
+];
+const FACULTY = [
+  {name:'Зарова Е.В.',      dept:'stat', h:23,  cit:2346, base:'GS/РИНЦ', role:'профессор', note:'Заслуженный деятель науки РФ, член Международного статистического института, экс-проректор РЭУ по науке', progs:['AiUD','BSA']},
+  {name:'Клочкова Е.Н.',    dept:'stat', h:22,  cit:3388, base:'GS', role:'доцент', note:'Соавтор учебников Юрайт «Экономика предприятия», «Статистика»', progs:['AiUD','BSA']},
+  {name:'Китова О.В.',      dept:'inf',  h:21,  cit:2100, base:'GS', role:'зав. кафедрой', note:'Руководитель СиТИИ; центр компетенций IBM; ред. учебника «Цифровой бизнес»; Диссернет — как член диссовета', progs:['SITII','IBA']},
+  {name:'Тихомиров Н.П.',   dept:'mme',  h:20,  cit:3290, base:'GS*', role:'профессор', note:'Заслуженный деятель науки РФ, автор учебника «Эконометрика»; *профиль GS частично склеен, реальные числа ниже', progs:['PMI','ABD']},
+  {name:'Максимов Д.А.',    dept:'mme',  h:19,  cit:1087, base:'РИНЦ', role:'зав. кафедрой', note:'Руководитель АБД, декан «Форсайта»; цифровые двойники, госзадания Минобрнауки', progs:['PMI','ABD']},
+  {name:'Афанасьева Т.В.',  dept:'inf',  h:17,  cit:1192, base:'GS', role:'профессор', note:'Нечёткие временные ряды, интеллектуальный анализ данных; коллаборация IT4Innovations', progs:['SITII','IBA']},
+  {name:'Садовникова Н.А.', dept:'stat', h:15,  cit:1670, base:'РИНЦ', role:'зав. кафедрой', note:'Руководитель БСА; соавтор классической «Теории статистики»', progs:['AiUD','BSA']},
+  {name:'Моисеев Н.А.',     dept:'mme',  h:15,  cit:920,  base:'GS', role:'профессор', note:'Model averaging, эконометрическое прогнозирование в международных журналах', progs:['PMI','ABD']},
+  {name:'Садыков Т.М.',     dept:'inf',  h:13,  cit:561,  base:'GS', role:'профессор', note:'PhD Стокгольмского университета, Compositio Mathematica; зав. ИИ-лабораторией РЭУ', progs:['SITII']},
+  {name:'Ярушев С.А.',      dept:'inf',  h:10,  cit:330,  base:'GS', role:'доцент', note:'Директор Центра перспективных исследований в ИИ, грант РНФ, ФИЦ ИУ РАН', progs:['SITII','IBA']},
+  {name:'Якобовский М.В.',  dept:'ran',  h:null, cit:null, base:null, role:'чл.-корр. РАН', note:'Директор ИПМ им. Келдыша РАН; зав. кафедрой «Моделирование больших систем» в «Форсайте»', progs:['ABD']},
+  {name:'Судаков В.А.',     dept:'ran',  h:null, cit:null, base:null, role:'д.т.н., профессор', note:'ИПМ РАН + МАИ; системы поддержки принятия решений для аэрокосмоса', progs:['ABD']},
+  {name:'Камкин А.С.',      dept:'ran',  h:null, cit:null, base:null, role:'к.ф.-м.н., в.н.с.', note:'ИСП РАН; формальная верификация ПО; преподаёт также в ВШЭ и МГУ', progs:['ABD']},
+  {name:'Асташова И.В.',    dept:'vm',   h:null, cit:null, base:null, role:'д.ф.-м.н., профессор', note:'Действующий профессор мехмата МГУ; качественная теория дифференциальных уравнений', progs:['PMI']},
+  {name:'Минашкин В.Г.',    dept:'stat', h:null, cit:null, base:null, role:'профессор, проректор', note:'Проректор РЭУ по науке; редактор линейки учебников «Статистика» (Юрайт)', progs:['AiUD','BSA']},
+  {name:'Косоруков О.А.',   dept:'mme',  h:null, cit:null, base:null, role:'д.т.н., профессор', note:'Школа исследования операций ВМК МГУ; учебник «Исследование операций»', progs:['PMI']},
+];
+const PROG_BY_KEY = Object.fromEntries(PROGS.map(p=>[p.key,p]));
+
+(function(){
+  const lg = document.getElementById('deptLegend');
+  DEPTS.forEach(d => {
+    const el2 = document.createElement('div'); el2.className = 'item';
+    el2.innerHTML = `<span class="sw" style="background:${d.color}"></span>${d.name}`;
+    lg.appendChild(el2);
+  });
+  const DEPT_COLOR = Object.fromEntries(DEPTS.map(d=>[d.key,d.color]));
+
+  // chart: h-index
+  const withH = FACULTY.filter(f => f.h);
+  const svg = document.getElementById('facChart');
+  const W = 1160, rowH = 30, m = {t:26, r:60, b:34, l:170};
+  const H = m.t + withH.length*rowH + m.b;
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  const pw = W - m.l - m.r;
+  const max = 25, ticks = [0,5,10,15,20,25];
+  const x = v => m.l + (v/max)*pw;
+  const bh = 16;
+  ticks.forEach(t => {
+    el('line', {x1:x(t), x2:x(t), y1:m.t-10, y2:m.t+withH.length*rowH-10, class: t===0?'baseline':'gridline'}, svg);
+    el('text', {x:x(t), y:m.t+withH.length*rowH+8, class:'tick', 'text-anchor':'middle'}, svg).textContent = t;
+  });
+  el('text', {x:m.l, y:m.t-16, class:'tick'}, svg).textContent = 'индекс Хирша (открытые профили GS/РИНЦ)';
+  withH.forEach((f,i) => {
+    const y0 = m.t + i*rowH - 10 + (rowH-bh)/2;
+    el('path', {d: barPath(x(0), y0, x(f.h)-x(0), bh, 4), fill: DEPT_COLOR[f.dept]}, svg);
+    el('text', {x:m.l-12, y:y0+bh/2+4, class:'axlabel', 'text-anchor':'end'}, svg).textContent = f.name;
+    el('text', {x:x(f.h)+8, y:y0+bh/2+4, class:'dlabel'}, svg).textContent = f.h + (f.base==='GS*' ? '*' : '');
+    const hit = el('rect', {x:0, y:m.t+i*rowH-10, width:W, height:rowH, class:'hit'}, svg);
+    bind(hit, `<div class="t">${f.name} — ${f.role}</div>
+      <div class="r">${f.note}</div><hr>
+      <div class="r">h-индекс (${f.base})<b>${f.h}</b></div>
+      ${f.cit ? `<div class="r">Цитирований<b>${fmt(f.cit)}</b></div>` : ''}
+      <div class="r">Программы<b>${f.progs.map(k=>PROG_BY_KEY[k].short).join(', ')}</b></div>`);
+  });
+
+  // table
+  const t = document.getElementById('facTable');
+  let html = '<thead><tr><th>Преподаватель</th><th>Статус</th><th>Кафедра</th><th class="num">h</th><th class="num">Цит.</th><th>Программы</th><th>Чем известен</th></tr></thead><tbody>';
+  FACULTY.forEach(f => {
+    const d = DEPTS.find(x=>x.key===f.dept);
+    html += `<tr>
+      <td style="white-space:nowrap"><b>${f.name}</b></td>
+      <td style="white-space:nowrap">${f.role}</td>
+      <td><span class="chip"><span class="sw" style="background:${d.color}"></span>${d.name.split(' (')[0]}</span></td>
+      <td class="num">${f.h ?? '—'}</td>
+      <td class="num">${f.cit ? fmt(f.cit) : '—'}</td>
+      <td style="white-space:nowrap">${f.progs.map(k=>`<span class="chip"><span class="sw" style="background:${PROG_BY_KEY[k].color}"></span>${PROG_BY_KEY[k].short}</span>`).join(' ')}</td>
+      <td style="color:var(--text-secondary)">${f.note}</td></tr>`;
+  });
+  html += '</tbody>';
+  t.innerHTML = html;
+})();
+
+// ---------- theme ----------
+document.getElementById('theme').addEventListener('click', () => {
+  const cur = document.documentElement.getAttribute('data-theme');
+  const dark = cur ? cur === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+  document.documentElement.setAttribute('data-theme', dark ? 'light' : 'dark');
+});
+</script>
+</body>
+</html>
