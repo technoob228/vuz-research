@@ -1,2 +1,4 @@
 .DS_Store
 *.numbers.tmp
+monitor/*.json
+monitor/rea.key
