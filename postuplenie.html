@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Поступление 2026: все программы и шансы</title>
+<style>
+  :root {
+    color-scheme: light;
+    --surface-1: #fcfcfb; --page: #f9f9f7;
+    --text-primary: #0b0b0b; --text-secondary: #52514e; --muted: #898781;
+    --grid: #e1e0d9; --axis: #c3c2b7; --border: rgba(11,11,11,0.10);
+    --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100; --s5: #e87ba4; --s7: #4a3aa7;
+    --dim: #d5d4cd;
+    --good: #0ca30c; --warning: #fab219; --serious: #ec835a; --critical: #d03b3b;
+    --accent-wash: rgba(42,120,214,0.08);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) {
+      color-scheme: dark;
+      --surface-1: #1a1a19; --page: #0d0d0d;
+      --text-primary: #ffffff; --text-secondary: #c3c2b7; --muted: #898781;
+      --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10);
+      --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500; --s5: #d55181; --s7: #9085e9;
+      --dim: #3a3a37; --accent-wash: rgba(57,135,229,0.14);
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --surface-1: #1a1a19; --page: #0d0d0d;
+    --text-primary: #ffffff; --text-secondary: #c3c2b7; --muted: #898781;
+    --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10);
+    --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500; --s5: #d55181; --s7: #9085e9;
+    --dim: #3a3a37; --accent-wash: rgba(57,135,229,0.14);
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--page); color:var(--text-primary);
+    font:14px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif; padding:32px 24px 64px; }
+  .wrap { max-width: 1220px; margin: 0 auto; }
+  header.top { display:flex; justify-content:space-between; align-items:flex-start; gap:24px; margin-bottom:22px; }
+  h1 { font-size:22px; font-weight:600; margin:0 0 6px; letter-spacing:-0.01em; }
+  .sub { color:var(--text-secondary); font-size:13px; margin:0; max-width:820px; }
+  button.ghost { background:transparent; border:1px solid var(--border); color:var(--text-secondary);
+    border-radius:8px; padding:7px 12px; font:inherit; font-size:13px; cursor:pointer; white-space:nowrap; }
+  button.ghost:hover { background:var(--surface-1); color:var(--text-primary); }
+
+  .deadline { background:var(--surface-1); border:1px solid var(--border); border-left:3px solid var(--critical);
+    border-radius:12px; padding:16px 20px; margin-bottom:18px; display:flex; align-items:center; gap:22px; flex-wrap:wrap; }
+  .deadline .big { font-size:26px; font-weight:600; letter-spacing:-0.02em; }
+  .deadline .lbl { color:var(--text-secondary); font-size:12.5px; }
+  .deadline .txt { color:var(--text-secondary); font-size:13px; flex:1; min-width:280px; }
+
+  .card { background:var(--surface-1); border:1px solid var(--border); border-radius:12px; padding:20px 22px; margin-bottom:18px; }
+  .card h2 { font-size:15px; font-weight:600; margin:0 0 4px; }
+  .card h3 { font-size:13.5px; font-weight:600; margin:22px 0 10px; }
+  .card .note { color:var(--text-secondary); font-size:12.5px; margin:0 0 18px; max-width:920px; }
+
+  .kpis { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:18px; }
+  .tile { background:var(--surface-1); border:1px solid var(--border); border-radius:12px; padding:18px 20px; }
+  .tile .label { color:var(--text-secondary); font-size:12.5px; margin-bottom:8px; }
+  .tile .value { font-size:28px; font-weight:600; letter-spacing:-0.02em; line-height:1.1; }
+  .tile .unit { font-size:14px; font-weight:400; color:var(--text-secondary); margin-left:4px; }
+  .tile .foot { color:var(--muted); font-size:12px; margin-top:8px; }
+
+  .legend { display:flex; flex-wrap:wrap; gap:14px; margin:0 0 16px; }
+  .legend .item { display:flex; align-items:center; gap:7px; font-size:12.5px; color:var(--text-secondary); }
+  .legend .sw { width:11px; height:11px; border-radius:3px; flex:none; }
+
+  svg { display:block; width:100%; overflow:visible; }
+  .tick { fill:var(--muted); font-size:11px; font-variant-numeric:tabular-nums; }
+  .axlabel { fill:var(--text-secondary); font-size:11.5px; }
+  .rowname { fill:var(--text-primary); font-size:11.5px; }
+  .dlabel { fill:var(--text-primary); font-size:11.5px; font-weight:600; font-variant-numeric:tabular-nums; }
+  .gridline { stroke:var(--grid); stroke-width:1; }
+  .baseline { stroke:var(--axis); stroke-width:1; }
+  .refline { stroke:var(--critical); stroke-width:1; }
+  .hit { fill:transparent; }
+
+  #tip { position:fixed; pointer-events:none; opacity:0; transition:opacity .1s;
+    background:var(--surface-1); border:1px solid var(--border); border-radius:9px;
+    padding:10px 12px; font-size:12.5px; box-shadow:0 6px 22px rgba(0,0,0,.16); z-index:50; max-width:330px; }
+  #tip .t { font-weight:600; margin-bottom:6px; }
+  #tip .r { display:flex; align-items:center; gap:7px; color:var(--text-secondary); }
+  #tip .r b { color:var(--text-primary); font-weight:600; font-variant-numeric:tabular-nums; margin-left:auto; padding-left:12px; }
+  #tip .sw { width:9px; height:9px; border-radius:2px; flex:none; }
+  #tip hr { border:none; border-top:1px solid var(--grid); margin:7px 0; }
+
+  table { width:100%; border-collapse:collapse; font-size:12.5px; }
+  th { text-align:left; font-weight:600; color:var(--text-secondary); font-size:11.5px;
+    padding:9px 8px; border-bottom:1px solid var(--axis); white-space:nowrap; cursor:pointer; user-select:none; }
+  th.num, td.num { text-align:right; font-variant-numeric:tabular-nums; }
+  th:hover { color:var(--text-primary); }
+  td { padding:8px; border-bottom:1px solid var(--grid); }
+  .chip { display:inline-flex; align-items:center; gap:6px; font-size:12px; color:var(--text-secondary); white-space:nowrap; }
+  .chip .sw { width:8px; height:8px; border-radius:2px; flex:none; }
+  .verdict { display:inline-flex; align-items:center; gap:6px; font-size:11.5px; font-weight:600; white-space:nowrap; }
+  .verdict .dot { width:8px; height:8px; border-radius:50%; flex:none; }
+  .filters { display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:16px; }
+  .filters select, .filters input { font:inherit; font-size:13px; padding:7px 10px; border-radius:8px;
+    border:1px solid var(--border); background:var(--surface-1); color:var(--text-primary); }
+  .filters .fl { color:var(--muted); font-size:12px; }
+
+  .prose p { font-size:13.2px; color:var(--text-secondary); margin:0 0 12px; max-width:940px; }
+  .prose p b, .prose strong { color:var(--text-primary); font-weight:600; }
+  .prose ol, .prose ul { font-size:13.2px; color:var(--text-secondary); max-width:940px; padding-left:20px; }
+  .prose li { margin-bottom:8px; }
+  .callout { border-left:3px solid var(--s1); padding:2px 0 2px 14px; margin:16px 0; }
+  .callout.warn { border-left-color:var(--critical); }
+  code { font-size:12px; background:var(--page); padding:1px 5px; border-radius:4px; border:1px solid var(--border); }
+  pre { background:var(--page); border:1px solid var(--border); border-radius:8px; padding:12px 14px;
+    font-size:11.5px; overflow-x:auto; line-height:1.5; }
+  footer { color:var(--muted); font-size:12px; margin-top:28px; line-height:1.7; }
+
+  @media (max-width:900px) { .kpis { grid-template-columns:1fr 1fr; } body { padding:20px 14px 48px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <div>
+    <h1>Поступление 2026: 41 программа, 6 вузов — где реальные шансы</h1>
+    <p class="sub">Разбор всех программ, куда поданы документы. Главный вопрос не «какой у меня балл», а «сколько человек выше в списке должны уйти, чтобы место освободилось» — и в каких случаях это реалистично.</p>
+  </div>
+  <button class="ghost" id="theme">Тёмная / светлая</button>
+</header>
+
+<div class="deadline">
+  <div>
+    <div class="lbl">До дедлайна согласия (основной этап)</div>
+    <div class="big" id="countdown">—</div>
+  </div>
+  <div class="txt">
+    <b>5 августа, 12:00 МСК</b> — крайний срок подачи согласия на зачисление на бюджет. Приказы — 7 августа.
+    Приоритетный этап (БВИ и квоты) закрылся 1 августа, приказы по нему вышли 3 августа.
+    Согласие даёт <b>высший проходной приоритет</b>: абитуриент с согласием зачисляется раньше того, у кого баллы выше, но согласия нет.
+  </div>
+</div>
+
+<div class="kpis">
+  <div class="tile">
+    <div class="label">Программ в заявках</div>
+    <div class="value">41</div>
+    <div class="foot">6 вузов; позиция в списке известна у 21</div>
+  </div>
+  <div class="tile">
+    <div class="label">Лучший шанс на бюджет</div>
+    <div class="value" id="kpiBest">—</div>
+    <div class="foot" id="kpiBestFoot">—</div>
+  </div>
+  <div class="tile">
+    <div class="label">Реалистичных вариантов</div>
+    <div class="value" id="kpiReal">—</div>
+    <div class="foot">нужен отток менее 70% — это в пределах нормы</div>
+  </div>
+  <div class="tile">
+    <div class="label">Платное обучение</div>
+    <div class="value">340–1 100<span class="unit">тыс/год</span></div>
+    <div class="foot">разброс за 4 года: 1,36 – 4,4 млн ₽</div>
+  </div>
+</div>
+
+<!-- MAIN CHART -->
+<div class="card">
+  <h2>Сколько человек выше должны уйти, чтобы место освободилось</h2>
+  <p class="note">Для каждой программы: позиция в конкурсном списке против числа бюджетных мест. Столбик — доля тех, кто выше и должен отсеяться. Красная линия на 80% — эмпирическая граница: типичный отток в списках 60–85%, потому что каждый абитуриент присутствует сразу в 25 списках (5 вузов × 5 приоритетов), а зачислится ровно в один. Всё, что левее линии — играбельно; всё, что правее — чудо.</p>
+  <div class="legend" id="vuzLegend"></div>
+  <svg id="chanceChart" role="img" aria-label="Необходимый отток по программам"></svg>
+</div>
+
+<!-- PRICE -->
+<div class="card">
+  <h2>Стоимость платного обучения</h2>
+  <p class="note">Если бюджет не сложится. Точка — программа, линия — диапазон вуза. ВШЭ Москва дороже РЭУ и Бауманки втрое: 4,4 млн против 1,4 млн за четыре года.</p>
+  <svg id="priceChart" role="img" aria-label="Стоимость обучения по вузам"></svg>
+</div>
+
+<!-- TABLE -->
+<div class="card">
+  <h2>Все программы</h2>
+  <p class="note">Клик по заголовку столбца — сортировка. «Нужен отток» рассчитан как (позиция − места) / (позиция − 1).</p>
+  <div class="filters">
+    <span class="fl">Вуз</span><select id="fVuz"><option value="">все</option></select>
+    <span class="fl">Шансы</span><select id="fVerdict"><option value="">все</option></select>
+    <input id="fSearch" type="search" placeholder="Поиск по программе…">
+    <span class="fl" id="fCount"></span>
+  </div>
+  <div style="overflow-x:auto"><table id="tbl"></table></div>
+</div>
+
+<!-- ANALYSIS -->
+<div class="card prose">
+  <h2>Что говорят цифры</h2>
+
+  <div class="callout warn">
+    <p><b>Сначала о качестве данных.</b> Колонка «проходной балл 2025» в исходной таблице (165–255) — это <b>минимальные баллы допуска</b>, а не проходные баллы прошлого года. Реальные проходные РЭУ 2025, которые я нашёл на официальных страницах: СиТИИ 240, БСА 264, ПМИ 267, АиУД 278, ИБА 284 — то есть на 60–110 баллов выше, чем в таблице. При баллах 232–255 запас над «проходным» из таблицы ничего не значит. Единственный надёжный сигнал сейчас — <b>фактическая позиция в конкурсном списке</b>, она в таблице есть у 21 программы.</p>
+  </div>
+
+  <h3>Три реалистичных варианта на бюджет</h3>
+  <p>По необходимому оттоку в топе оказываются три программы, и они не самые очевидные:</p>
+  <ol>
+    <li><b>РЭУ, Аналитика и управление данными</b> — позиция 171 при 69 местах. Нужен отток 60% — это ниже типичного. Самый реальный бюджетный вариант из всех сорока одного.</li>
+    <li><b>ВШЭ СПб, Международная программа по бизнесу и экономике</b> — 296 при 98 местах, отток 67%. Тоже в норме, и это ВШЭ.</li>
+    <li><b>Бауманка, Цифровая экономика и бизнес-анализ</b> — 227 при 75 местах, отток 67%. Плюс самая дешёвая платка из всех — 340 тыс.</li>
+  </ol>
+  <p>Дальше идёт разрыв: РАНХиГС ПМИ (188 при 30 местах) требует уже 84,5% оттока, РЭУ биоэкономика и ИБА — 86%, и так далее. А программы вроде РЭУ АБД (709-я позиция при 9 местах, отток 98,9%) или РАНХиГС «Экономика, финансы и анализ» (1280-я при 40 местах) — это статистически ноль.</p>
+
+  <h3>Парадокс приоритетов</h3>
+  <p>Обрати внимание: три лидера по шансам — это <b>не</b> те программы, которые обсуждались как приоритетные по содержанию. Разбор учебных планов РЭУ показал, что АиУД — сильнейшая статистическая программа с лучшей кафедрой; и по позиции в списке она же оказалась самой достижимой. Это редкий случай, когда содержательный и тактический выбор совпадают.</p>
+  <p>При этом ИБА (284 балла проходной, 1000-я позиция при 143 местах) и АБД (98,9% оттока) — практически недостижимы, хотя АБД самая интересная по составу преподавателей из РАН.</p>
+
+  <h3>Про расстановку приоритетов</h3>
+  <p>Механика 2026: приоритет от 1 до 5 внутри каждого вуза, зачисление идёт по наивысшему приоритету, где абитуриент проходит. Значит ставить приоритет 1 на программу с оттоком 95%+ — это выбросить приоритет: система будет держать место в очереди там, где шансов нет, вместо того чтобы зачислить туда, где они есть.</p>
+  <p>Рациональная расстановка: <b>приоритет 1 — на самый достижимый вариант</b>, который при этом устраивает по содержанию (в нашем случае это АиУД в РЭУ), а мечты типа АБД — на низкие приоритеты. Обратная расстановка почти гарантирует пролёт мимо бюджета вообще.</p>
+
+  <h3>Если бюджет не сложится</h3>
+  <p>Разброс платного огромный: от 340 тыс. в Бауманке до 1,1 млн в ВШЭ Москва — это 1,36 против 4,4 млн за четыре года. При этом по учебным планам разница между программами далеко не трёхкратная. РЭУ (350–420 тыс.) и Бауманка (340–360 тыс.) выглядят разумным компромиссом, ВШЭ СПб (430–510 тыс.) — заметно дешевле московской ВШЭ при том же бренде.</p>
+</div>
+
+<!-- MONITOR SPEC -->
+<div class="card prose">
+  <h2>Как сделать реалтайм-монитор шансов</h2>
+
+  <p>Твоя идея рабочая, и вот почему. Конкурсные списки в 2026 году содержат ровно то, что нужно для симуляции: <b>уникальный код абитуриента, баллы, приоритет, отметку о согласии</b>. Обновляются не реже пяти раз в сутки. Фамилий нет — данные уже обезличены, и деанонимизация не нужна: для расчёта достаточно кода как идентификатора.</p>
+
+  <div class="callout">
+    <p><b>Ключевая гипотеза — та самая, что ты заметил:</b> если код абитуриента одинаков в списках разных вузов (он выдаётся Суперсервисом «Поступление в вуз онлайн» через Госуслуги), то по коду можно склеить все заявки одного человека и увидеть его полную картину: где он ещё стоит, с каким приоритетом и где подал согласие. <b>Проверяется за пять минут:</b> взять код Кати и поискать его в списках других вузов. Если находится — весь план ниже работает. Если у каждого вуза свой код — остаётся более слабая версия (только внутривузовская симуляция).</p>
+  </div>
+
+  <h3>Что даёт склейка по коду</h3>
+  <p>Обычный калькулятор шансов считает «моя позиция против числа мест» — то есть ровно то, что в таблице выше. Склейка даёт качественно другое: <b>для каждого человека выше тебя в списке видно, уйдёт он или останется</b>.</p>
+  <ul>
+    <li>Если у конкурента эта программа стоит приоритетом 4, а приоритетом 1 у него другой вуз, где он проходит с запасом — он <b>уйдёт</b>, его место освободится.</li>
+    <li>Если он подал согласие в другом вузе — он <b>уже ушёл</b>, просто список ещё не обновился.</li>
+    <li>Если у него эта программа приоритет 1 и есть согласие — он <b>останется</b> гарантированно.</li>
+  </ul>
+  <p>Вместо усреднённой оценки «отток обычно 60–85%» получается поимённый (покодовый) расчёт: сколько именно людей выше реально претендуют на место. Это и есть настоящий проходной балл в моменте.</p>
+
+  <h3>Архитектура</h3>
+  <pre>сборщик (каждые 15-30 мин)
+  ├─ парсеры вузов: ВШЭ, РЭУ, РАНХиГС, Бауманка, ЦУ
+  │    каждый отдаёт: {код, программа, баллы, приоритет, согласие, позиция}
+  └─ пишет снапшот в БД с меткой времени
+
+движок симуляции (после каждого сбора)
+  ├─ склейка: группируем строки по коду → профиль абитуриента
+  ├─ итеративное зачисление:
+  │    повторяем до стабилизации:
+  │      для каждой программы: берём топ-N по баллам с учётом ВПП
+  │      если человек зачислен куда-то по более высокому приоритету —
+  │      вычёркиваем его из всех списков ниже приоритетом
+  │      пересчитываем границы
+  └─ выдаёт: прогноз проходного балла и позиции по каждой программе
+
+фронтенд
+  ├─ «где я прохожу прямо сейчас» — по всем 41 программам
+  ├─ история позиции: график за все дни
+  ├─ рекомендация по расстановке приоритетов
+  └─ алерты в телеграм при изменении статуса</pre>
+
+  <h3>Реализация, если делать всерьёз</h3>
+  <ol>
+    <li><b>Парсеры.</b> Самое трудоёмкое: у каждого вуза свой формат — HTML-таблица, XLSX или JSON за фронтендом. Начать с сетевой вкладки браузера: часто список тянется отдельным JSON-запросом, который можно дёргать напрямую. Один вуз — 30–60 минут работы.</li>
+    <li><b>Хранилище.</b> SQLite или Postgres, таблица snapshots (код, вуз, программа, баллы, приоритет, согласие, позиция, время). История нужна, чтобы видеть динамику и скорость оттока.</li>
+    <li><b>Движок.</b> Итеративный алгоритм отложенного принятия (deferred acceptance, он же алгоритм Гейла–Шепли) — это в точности та задача, которую решает сам Суперсервис при зачислении. 50–100 строк кода.</li>
+    <li><b>Фронт.</b> Один HTML-файл на тех же принципах, что этот дашборд, плюс автообновление.</li>
+    <li><b>Алерты.</b> Телеграм-бот: «твоя позиция на АиУД поднялась на 12 мест», «прогноз: проходишь», «прогноз изменился на не проходишь».</li>
+  </ol>
+
+  <h3>Трезво о сроках</h3>
+  <p>Полноценный сервис — это два-три дня работы. <b>До дедлайна 5 августа их нет.</b> Поэтому реалистичный план на оставшееся время:</p>
+  <ul>
+    <li><b>Сегодня-завтра, 2–3 часа:</b> парсер только под те 3–5 программ, которые реально в игре (АиУД, ВШЭ СПб международная, Бауманка цифровая экономика) + проверка гипотезы про единый код. Даже без склейки видно главное: сколько людей выше подали согласие. Если из 170 человек выше согласие подали 40 — место практически есть.</li>
+    <li><b>4 августа:</b> прогон симуляции на собранных данных, финальное решение по приоритетам.</li>
+    <li><b>5 августа до 12:00:</b> подача согласия.</li>
+  </ul>
+  <p>Полную версию сервиса имеет смысл достроить <b>после</b> этой кампании — она пригодится в следующем году и как проект в портфолио, из неё выходит нормальный продукт.</p>
+
+  <h3>Что здесь законно, а что нет</h3>
+  <p>Конкурсные списки — официально публикуемые открытые данные, вузы обязаны их публиковать. Они обезличены: кодов достаточно для расчёта, ФИО в них нет. Сбор и анализ таких списков — это то, чем занимаются десятки сервисов вроде vuzopedia и «Поступашек».</p>
+  <p>Границы, которые не стоит переходить: <b>не пытаться сопоставить коды с реальными людьми</b> (соцсети, чаты, утечки) — это уже обработка персональных данных без основания; не публиковать собранную базу целиком; уважать нагрузку на сайты вузов (интервал 15–30 минут более чем достаточен, списки чаще пяти раз в сутки не обновляются). Инструмент для собственного решения — нормально; сервис, показывающий «кто эти люди» — нет.</p>
+</div>
+
+<footer>
+  Источник данных о заявках — таблица <code>data/вузы.csv</code>. Проходные баллы РЭУ 2025 — bakalavr.rea.ru и ucheba.ru.
+  Правила приёма — приказ Минобрнауки № 821, календарь кампании 2026.<br>
+  Позиции в конкурсных списках указаны на момент составления таблицы и меняются несколько раз в сутки — перед решением сверяйся с актуальными списками вузов.
+</footer>
+
+</div>
+<div id="tip" role="tooltip"></div>
+
+<script>
+// ---------- data ----------
+const VUZY = [
+  {key:'HSE_SPB', name:'ВШЭ СПб',   color:'var(--s1)'},
+  {key:'HSE_MSK', name:'ВШЭ Москва', color:'var(--s2)'},
+  {key:'REA',     name:'РЭУ',        color:'var(--s3)'},
+  {key:'BMSTU',   name:'Бауманка',   color:'var(--s4)'},
+  {key:'RANEPA',  name:'РАНХиГС',    color:'var(--s5)'},
+  {key:'CU',      name:'ЦУ',         color:'var(--s7)'},
+];
+const VUZ_NAME = Object.fromEntries(VUZY.map(v=>[v.key,v.name]));
+const VUZ_COLOR = Object.fromEntries(VUZY.map(v=>[v.key,v.color]));
+
+// [вуз, программа, минбалл(допуск), балл Кати, мест, позиция в списке, цена тыс/год]
+const RAW = [
+  ['CU','Бизнес-информатика',230,232,111,null,870],
+  ['HSE_SPB','Аналитика в экономике',180,248,107,426,440],
+  ['HSE_SPB','Прикладная математика и информатика',210,232,30,355,430],
+  ['HSE_SPB','Бизнес-информатика',190,232,40,458,470],
+  ['HSE_SPB','Международная программа по бизнесу и экономике',185,248,98,296,510],
+  ['HSE_MSK','Технологии анализа данных в бизнесе',227,232,35,null,1100],
+  ['HSE_MSK','Бизнес-информатика',241,232,110,null,1100],
+  ['HSE_MSK','Управление цифровым продуктом',203,232,65,null,1100],
+  ['HSE_MSK','Экономика',220,null,165,null,890],
+  ['HSE_MSK','Совместная программа по экономике НИУ ВШЭ и РЭШ',255,248,45,null,1100],
+  ['HSE_MSK','Экономика и анализ данных',250,248,110,null,890],
+  ['HSE_MSK','Экономика и статистика',222,248,120,null,890],
+  ['HSE_MSK','Мировая экономика',280,248,103,null,1020],
+  ['HSE_MSK','Международная программа по экономике и финансам',234,248,278,null,1170],
+  ['REA','Системы и технологии искусственного интеллекта',180,234,105,760,420],
+  ['REA','Аналитика и управление данными',175,234,69,171,390],
+  ['REA','Прикладная математика и информатика',170,234,14,322,350],
+  ['REA','Аналитика больших данных в экономике',180,250,9,709,400],
+  ['REA','Бизнес-статистика и аналитика',175,250,29,832,390],
+  ['REA','Информационная бизнес-аналитика в цифровой среде',175,234,143,1000,400],
+  ['REA','Биоэкономика',165,250,39,267,360],
+  ['BMSTU','Прикладная математика и информатика',160,239,20,828,360],
+  ['BMSTU','Математические методы ИИ и управления',160,239,56,827,360],
+  ['BMSTU','Цифровая экономика и бизнес-анализ',155,255,75,227,340],
+  ['BMSTU','Бизнес-информатика',160,239,87,776,350],
+  ['RANEPA','Бизнес-информатика',180,234,73,791,440],
+  ['RANEPA','Прикладная математика и информатика',170,234,30,188,380],
+  ['RANEPA','Экономика, финансы и анализ',180,250,40,1280,430],
+  ['RANEPA','Экономика предприятий и организаций',175,250,100,958,400],
+  ['RANEPA','Экономический анализ в современном мире',177,250,45,715,410],
+  ['RANEPA','Технологии экономики и управления',170,250,30,296,390],
+  ['RANEPA','Цифровые технологии и разработка информационных систем',177,234,67,null,475],
+  ['RANEPA','Цифровые технологии',175,234,20,null,450],
+  ['RANEPA','Экономика бизнеса',180,250,66,null,420],
+  ['RANEPA','Финансы и кредит',180,250,36,null,430],
+  ['RANEPA','Банки и финансовые рынки',175,250,48,null,420],
+  ['RANEPA','Экономика топливно-энергетического комплекса',170,250,22,null,410],
+  ['RANEPA','Системы искусственного интеллекта',180,234,35,null,460],
+  ['RANEPA','Инновационный менеджмент',171,234,50,null,450],
+  ['RANEPA','Предпринимательство и управление эффективностью бизнеса',180,250,77,null,470],
+  ['RANEPA','Корпоративные финансы: учет, анализ и аудит',198,250,20,null,440],
+];
+
+// реальные проходные баллы прошлого года там, где найдены (bakalavr.rea.ru / ucheba.ru)
+const REAL_CUTOFF = {
+  'REA|Системы и технологии искусственного интеллекта':240,
+  'REA|Бизнес-статистика и аналитика':264,
+  'REA|Прикладная математика и информатика':267,
+  'REA|Аналитика и управление данными':278,
+  'REA|Информационная бизнес-аналитика в цифровой среде':284,
+};
+
+const PROGS = RAW.map(r => {
+  const [vuz, prog, minScore, my, seats, pos, price] = r;
+  const churn = pos ? (pos - seats) / (pos - 1) : null;   // нужная доля оттока
+  let verdict;
+  if (!pos) verdict = 'unknown';
+  else if (churn <= 0) verdict = 'in';
+  else if (churn < 0.70) verdict = 'real';
+  else if (churn < 0.86) verdict = 'edge';
+  else verdict = 'no';
+  return {vuz, prog, minScore, my, seats, pos, price, churn, verdict,
+          cutoff: REAL_CUTOFF[vuz+'|'+prog] ?? null};
+});
+
+const VERDICTS = {
+  in:      {label:'Проходит сейчас', color:'var(--good)'},
+  real:    {label:'Реалистично',     color:'var(--good)'},
+  edge:    {label:'На грани',        color:'var(--warning)'},
+  no:      {label:'Почти нет',       color:'var(--critical)'},
+  unknown: {label:'Нет позиции',     color:'var(--muted)'},
+};
+
+// ---------- helpers ----------
+const SVGNS='http://www.w3.org/2000/svg';
+function el(tag,attrs,parent){const n=document.createElementNS(SVGNS,tag);
+  for(const k in attrs)n.setAttribute(k,attrs[k]); if(parent)parent.appendChild(n); return n;}
+function barPath(x,y,w,h,r){ if(w<=0)return''; r=Math.min(r,w,h/2);
+  return `M${x},${y} L${x+w-r},${y} Q${x+w},${y} ${x+w},${y+r} L${x+w},${y+h-r} Q${x+w},${y+h} ${x+w-r},${y+h} L${x},${y+h} Z`;}
+const fmt = n => n.toLocaleString('ru-RU');
+const pct = v => (v*100).toFixed(1).replace('.',',') + '%';
+
+const tip=document.getElementById('tip');
+function showTip(e,html){tip.innerHTML=html; tip.style.opacity=1; moveTip(e);}
+function moveTip(e){const pad=14,w=tip.offsetWidth,h=tip.offsetHeight;
+  let x=e.clientX+pad,y=e.clientY+pad;
+  if(x+w>innerWidth-8)x=e.clientX-w-pad; if(y+h>innerHeight-8)y=e.clientY-h-pad;
+  tip.style.left=x+'px'; tip.style.top=y+'px';}
+function hideTip(){tip.style.opacity=0;}
+function bind(node,html){
+  node.addEventListener('mouseenter',e=>showTip(e,html));
+  node.addEventListener('mousemove',moveTip);
+  node.addEventListener('mouseleave',hideTip);
+  node.setAttribute('tabindex','0');
+  node.addEventListener('focus',()=>{const r=node.getBoundingClientRect();
+    showTip({clientX:r.left+Math.min(r.width/2,200),clientY:r.top},html);});
+  node.addEventListener('blur',hideTip);
+}
+function progTip(p){
+  const v=VERDICTS[p.verdict];
+  return `<div class="t">${p.prog}</div>
+    <div class="r"><span class="sw" style="background:${VUZ_COLOR[p.vuz]}"></span>${VUZ_NAME[p.vuz]}</div><hr>
+    ${p.pos ? `<div class="r">Позиция в списке<b>${fmt(p.pos)}</b></div>
+    <div class="r">Бюджетных мест<b>${p.seats}</b></div>
+    <div class="r">Нужен отток<b>${pct(p.churn)}</b></div>
+    <div class="r">Человек выше должны уйти<b>${fmt(p.pos - p.seats)}</b></div>` :
+    `<div class="r">Позиция в списке<b>неизвестна</b></div>
+     <div class="r">Бюджетных мест<b>${p.seats}</b></div>`}
+    <hr>
+    <div class="r">Балл Кати<b>${p.my ?? '—'}</b></div>
+    <div class="r">Минимальный балл<b>${p.minScore}</b></div>
+    ${p.cutoff ? `<div class="r">Проходной 2025 (факт)<b>${p.cutoff}</b></div>` : ''}
+    <div class="r">Стоимость<b>${p.price} тыс/год</b></div>
+    <div class="r">Вердикт<b style="color:${v.color}">${v.label}</b></div>`;
+}
+
+// ---------- countdown ----------
+(function(){
+  const el2=document.getElementById('countdown');
+  const target=new Date('2026-08-05T12:00:00+03:00');
+  function upd(){
+    const d=target-new Date();
+    if(d<=0){el2.textContent='срок истёк'; return;}
+    const h=Math.floor(d/3600000), m=Math.floor(d%3600000/60000);
+    el2.textContent=`${h} ч ${m} мин`;
+  }
+  upd(); setInterval(upd,30000);
+})();
+
+// ---------- KPI ----------
+(function(){
+  const ranked=PROGS.filter(p=>p.pos).sort((a,b)=>a.churn-b.churn);
+  const best=ranked[0];
+  document.getElementById('kpiBest').textContent=pct(best.churn).replace(',0','');
+  document.getElementById('kpiBestFoot').textContent=`${VUZ_NAME[best.vuz]}, ${best.prog} — нужный отток`;
+  document.getElementById('kpiReal').textContent=PROGS.filter(p=>p.verdict==='real'||p.verdict==='in').length;
+})();
+
+// ---------- chance chart ----------
+(function(){
+  const lg=document.getElementById('vuzLegend');
+  VUZY.forEach(v=>{const d=document.createElement('div'); d.className='item';
+    d.innerHTML=`<span class="sw" style="background:${v.color}"></span>${v.name}`; lg.appendChild(d);});
+
+  const rows=PROGS.filter(p=>p.pos).sort((a,b)=>a.churn-b.churn);
+  const svg=document.getElementById('chanceChart');
+  const W=1160, rowH=30, m={t:34,r:150,b:40,l:330};
+  const H=m.t+rows.length*rowH+m.b;
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  const pw=W-m.l-m.r;
+  const x=v=>m.l+v*pw;
+  const bh=17;
+  [0,0.2,0.4,0.6,0.8,1].forEach(t=>{
+    el('line',{x1:x(t),x2:x(t),y1:m.t-12,y2:m.t+rows.length*rowH-12,class:t===0?'baseline':'gridline'},svg);
+    el('text',{x:x(t),y:m.t+rows.length*rowH+6,class:'tick','text-anchor':'middle'},svg).textContent=Math.round(t*100)+'%';
+  });
+  el('text',{x:m.l,y:m.t-20,class:'tick'},svg).textContent='какая доля стоящих выше должна уйти';
+  // reference line 80%
+  el('line',{x1:x(0.8),x2:x(0.8),y1:m.t-12,y2:m.t+rows.length*rowH-12,class:'refline'},svg);
+  el('text',{x:x(0.8)+6,y:m.t-6,class:'tick',fill:'var(--critical)'},svg).textContent='граница реального оттока';
+
+  rows.forEach((p,i)=>{
+    const y0=m.t+i*rowH-12+(rowH-bh)/2;
+    el('path',{d:barPath(x(0),y0,x(p.churn)-x(0),bh,4),fill:VUZ_COLOR[p.vuz]},svg);
+    const label=el('text',{x:m.l-12,y:y0+bh/2+4,class:'rowname','text-anchor':'end'},svg);
+    const nm=p.prog.length>42?p.prog.slice(0,40)+'…':p.prog;
+    label.textContent=`${VUZ_NAME[p.vuz]} · ${nm}`;
+    if(p.verdict==='real'||p.verdict==='in'){label.setAttribute('font-weight','600');}
+    el('text',{x:x(p.churn)+10,y:y0+bh/2+4,class:'dlabel'},svg).textContent=pct(p.churn);
+    el('text',{x:x(p.churn)+62,y:y0+bh/2+4,class:'tick'},svg).textContent=`${fmt(p.pos)} / ${p.seats}`;
+    const hit=el('rect',{x:0,y:m.t+i*rowH-12,width:W,height:rowH,class:'hit'},svg);
+    bind(hit,progTip(p));
+  });
+})();
+
+// ---------- price chart ----------
+(function(){
+  const svg=document.getElementById('priceChart');
+  const W=1160, rowH=48, m={t:34,r:40,b:40,l:120};
+  const H=m.t+VUZY.length*rowH+m.b;
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  const pw=W-m.l-m.r;
+  const max=1200, ticks=[0,300,600,900,1200];
+  const x=v=>m.l+(v/max)*pw;
+  ticks.forEach(t=>{
+    el('line',{x1:x(t),x2:x(t),y1:m.t-14,y2:m.t+VUZY.length*rowH-14,class:t===0?'baseline':'gridline'},svg);
+    el('text',{x:x(t),y:m.t+VUZY.length*rowH+6,class:'tick','text-anchor':'middle'},svg).textContent=fmt(t);
+  });
+  el('text',{x:m.l,y:m.t-22,class:'tick'},svg).textContent='тысяч ₽ в год';
+
+  VUZY.forEach((v,i)=>{
+    const list=PROGS.filter(p=>p.vuz===v.key);
+    if(!list.length)return;
+    const cy=m.t+i*rowH-14+rowH/2;
+    const lo=Math.min(...list.map(p=>p.price)), hi=Math.max(...list.map(p=>p.price));
+    el('text',{x:m.l-14,y:cy+4,class:'axlabel','text-anchor':'end'},svg).textContent=v.name;
+    el('line',{x1:x(lo),x2:x(hi),y1:cy,y2:cy,stroke:'var(--grid)','stroke-width':3,'stroke-linecap':'round'},svg);
+    list.forEach(p=>{
+      const c=el('circle',{cx:x(p.price),cy,r:5,fill:v.color,stroke:'var(--surface-1)','stroke-width':2},svg);
+      bind(c,progTip(p));
+    });
+    el('text',{x:x(hi)+14,y:cy+4,class:'tick'},svg).textContent=`${list.length} прогр. · ${fmt(lo)}–${fmt(hi)}`;
+  });
+})();
+
+// ---------- table ----------
+(function(){
+  const t=document.getElementById('tbl');
+  const fVuz=document.getElementById('fVuz'), fVerdict=document.getElementById('fVerdict'),
+        fSearch=document.getElementById('fSearch'), fCount=document.getElementById('fCount');
+  VUZY.forEach(v=>fVuz.insertAdjacentHTML('beforeend',`<option value="${v.key}">${v.name}</option>`));
+  Object.entries(VERDICTS).forEach(([k,v])=>fVerdict.insertAdjacentHTML('beforeend',`<option value="${k}">${v.label}</option>`));
+
+  const COLS=[
+    {k:'vuz',    t:'Вуз',        get:p=>VUZ_NAME[p.vuz]},
+    {k:'prog',   t:'Программа',  get:p=>p.prog},
+    {k:'my',     t:'Балл',       num:1, get:p=>p.my},
+    {k:'cutoff', t:'Проходной 25', num:1, get:p=>p.cutoff},
+    {k:'seats',  t:'Мест',       num:1, get:p=>p.seats},
+    {k:'pos',    t:'Позиция',    num:1, get:p=>p.pos},
+    {k:'churn',  t:'Нужен отток',num:1, get:p=>p.churn},
+    {k:'verdict',t:'Шансы',      get:p=>p.verdict},
+    {k:'price',  t:'₽ тыс/год',  num:1, get:p=>p.price},
+    {k:'price4', t:'За 4 года',  num:1, get:p=>p.price*4},
+  ];
+  let sortKey='churn', sortDir=1;
+
+  function render(){
+    const vf=fVuz.value, vd=fVerdict.value, q=fSearch.value.trim().toLowerCase();
+    let rows=PROGS.filter(p=>(!vf||p.vuz===vf)&&(!vd||p.verdict===vd)&&
+      (!q||p.prog.toLowerCase().includes(q)||VUZ_NAME[p.vuz].toLowerCase().includes(q)));
+    const col=COLS.find(c=>c.k===sortKey);
+    rows.sort((a,b)=>{
+      let x=col.get(a), y=col.get(b);
+      if(x===null||x===undefined)return 1; if(y===null||y===undefined)return -1;
+      if(typeof x==='string')return sortDir*x.localeCompare(y,'ru');
+      return sortDir*(x-y);
+    });
+    let html='<thead><tr>'+COLS.map(c=>
+      `<th class="${c.num?'num':''}" data-k="${c.k}">${c.t}${sortKey===c.k?(sortDir>0?' ↑':' ↓'):''}</th>`).join('')+'</tr></thead><tbody>';
+    rows.forEach(p=>{
+      const v=VERDICTS[p.verdict];
+      html+=`<tr>
+        <td><span class="chip"><span class="sw" style="background:${VUZ_COLOR[p.vuz]}"></span>${VUZ_NAME[p.vuz]}</span></td>
+        <td>${p.prog}</td>
+        <td class="num">${p.my ?? '—'}</td>
+        <td class="num" style="color:${p.cutoff&&p.my&&p.my<p.cutoff?'var(--critical)':'inherit'}">${p.cutoff ?? '—'}</td>
+        <td class="num">${p.seats}</td>
+        <td class="num">${p.pos ? fmt(p.pos) : '—'}</td>
+        <td class="num">${p.churn!==null ? pct(p.churn) : '—'}</td>
+        <td><span class="verdict" style="color:${v.color}"><span class="dot" style="background:${v.color}"></span>${v.label}</span></td>
+        <td class="num">${p.price}</td>
+        <td class="num">${fmt(p.price*4/1000).replace('.',',')} млн</td>
+      </tr>`;
+    });
+    html+='</tbody>';
+    t.innerHTML=html;
+    fCount.textContent=`${rows.length} из ${PROGS.length}`;
+    t.querySelectorAll('th').forEach(th=>th.addEventListener('click',()=>{
+      const k=th.dataset.k;
+      if(sortKey===k)sortDir*=-1; else {sortKey=k; sortDir=1;}
+      render();
+    }));
+  }
+  [fVuz,fVerdict].forEach(e=>e.addEventListener('change',render));
+  fSearch.addEventListener('input',render);
+  render();
+})();
+
+document.getElementById('theme').addEventListener('click',()=>{
+  const cur=document.documentElement.getAttribute('data-theme');
+  const dark=cur?cur==='dark':matchMedia('(prefers-color-scheme: dark)').matches;
+  document.documentElement.setAttribute('data-theme',dark?'light':'dark');
+});
+</script>
+</body>
+</html>
